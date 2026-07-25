@@ -49,7 +49,7 @@ class IcadAdapter:
         if destination.protocol == "tone-detect":
             field = "file"; fields = {"api_key": destination.api_key, **call.original}
         else:
-            field = "audio"; fields = {"key": destination.api_key, "talkgroup": str(call.talkgroup), "start_time": str(call.start_time), "freq": str(call.frequency), "source": call.system_short_name, "src": call.system_short_name, "system": destination.system_id, "system_id": destination.system_id, "audio_type": call.audio_type, "talkgroup_tag": call.talkgroup_tag, "talkgroup_description": call.talkgroup_description}
+            field = "audio"; fields = {"key": destination.api_key, "talkgroup": str(call.talkgroup), "start_time": str(call.start_time), "freq": str(call.frequency), "frequency": str(call.frequency), "source": call.system_short_name, "src": call.system_short_name, "profile": call.system_short_name, "system": destination.system_id, "system_id": destination.system_id, "audio_type": call.audio_type, "talkgroup_tag": call.talkgroup_tag, "talkgroup_description": call.talkgroup_description}
         fields = {k: v for k, v in fields.items() if v not in ("", None)}
         try:
             with audio.open("rb") as fh:

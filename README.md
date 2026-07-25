@@ -94,6 +94,8 @@ Run tests without production endpoints:
 
 ```sh
 python3 -m pytest
+python3 -m coverage run -m pytest
+python3 -m coverage report -m
 ```
 
 Before enabling a real URL, require a passing validation, passing tests, and a reviewed dry run. The first live test should copy one completed WAV/JSON/M4A call to a separate test directory and invoke the uploader manually against one reviewed destination. Do not use an actively changing Trunk Recorder call.

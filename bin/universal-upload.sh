@@ -8,10 +8,14 @@ if [[ $# -lt 2 || $# -gt 4 ]]; then
   exit 2
 fi
 
-if [[ -f "$1" && -f "$2" ]]; then
+is_json_path() {
+  [[ "${1##*/}" == *.json || "${1##*/}" == *.JSON ]]
+}
+
+if [[ -f "$1" && -f "$2" ]] && is_json_path "$2"; then
   args=(upload "$@")
 else
-  if [[ $# -lt 3 || ! -f "$2" || ! -f "$3" ]]; then
+  if (( $# < 3 )) || [[ ! -f "$2" || ! -f "$3" ]] || ! is_json_path "$3"; then
     echo "Usage: $0 [PROFILE] WAV JSON [M4A]" >&2
     exit 2
   fi

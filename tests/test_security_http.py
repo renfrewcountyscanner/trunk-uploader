@@ -18,3 +18,9 @@ def test_retry_classification():
     assert classify(response(429)).retryable
     assert not classify(response(401)).retryable
     assert classify(error=TimeoutError()).retryable
+
+
+def test_permanent_4xx_classification():
+    assert not classify(response(400)).retryable
+    assert not classify(response(401)).retryable
+    assert not classify(response(404)).retryable

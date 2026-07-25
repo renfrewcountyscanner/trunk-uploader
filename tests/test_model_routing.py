@@ -4,6 +4,7 @@ from pathlib import Path
 from trunk_uploader.config import load_config
 from trunk_uploader.model import normalize
 from trunk_uploader.routing import select_profile
+from tests.test_config import write_config
 
 
 def files(tmp_path: Path):
@@ -28,3 +29,26 @@ def test_profile_selection(tmp_path):
     call = normalize(audio, metadata); settings = load_config(config)
     assert select_profile(call, settings) == "p"
     assert select_profile(call, settings, "p") == "p"
+
+
+def test_encrypted_string_and_explicit_profile_errors(tmp_path):
+    audio, metadata = files(tmp_path)
+    metadata.write_text(metadata.read_text().replace('"encrypted": 0', '"encrypted": "true"'))
+    call = normalize(audio, metadata)
+    assert call.encrypted is True
+    config = Path(tmp_path / "uploader.conf")
+    config.write_text((Path(__file__).parents[1] / "config/uploader.conf.example").read_text().replace("default_profile = fleetnet-pembroke", "default_profile = p").replace("[profile:fleetnet-pembroke]", "[profile:p]").replace("profile = fleetnet-pembroke", "profile = p"))
+    from trunk_uploader.config import load_config
+    from trunk_uploader.routing import select_profile
+    from pytest import raises
+    with raises(ValueError): select_profile(call, load_config(config), "missing")
+
+
+def test_destination_filtering_is_independent(tmp_path):
+    config = write_config(tmp_path).read_text()
+    config = config.replace("[method:icad]\nenabled = no", "[method:icad]\nenabled = yes").replace("icad_enabled = no", "icad_enabled = yes").replace("[icad:renfrew]\nenabled = no", "[icad:renfrew]\nenabled = yes")
+    config = config.replace("[icad:renfrew]\nenabled = yes\nprofile = p\nurl = https://icad.example.invalid/api/call-upload\napi_key = CHANGE_ME\nsystem_id = 2\nprotocol = call-upload\ntalkgroups = *", "[icad:renfrew]\nenabled = yes\nprofile = p\nurl = https://icad.example.invalid/api/call-upload\napi_key = test-key\nsystem_id = 2\nprotocol = call-upload\ntalkgroups = 9056")
+    path = tmp_path / "filter.conf"; path.write_text(config)
+    settings = load_config(path)
+    assert [d.name for d in settings.matching("p", 9056)] == ["renfrew"]
+    assert settings.matching("p", 1) == []

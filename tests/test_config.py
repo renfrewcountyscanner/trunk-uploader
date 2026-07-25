@@ -31,6 +31,32 @@ def test_config_load_and_unknown_key(tmp_path):
     with pytest.raises(ValueError): load_config(bad)
 
 
+def test_validation_reports_multiple_errors(tmp_path):
+    bad = write_config(tmp_path).read_text()
+    bad = bad.replace("retry_max_attempts = 8", "retry_max_attempts = nope").replace("retry_base_seconds = 30", "retry_base_seconds = 60").replace("retry_max_seconds = 3600", "retry_max_seconds = 10")
+    bad += "\n[profile:broken]\nenabled = maybe\nunknown = value\n"
+    path = tmp_path / "many-errors.conf"; path.write_text(bad)
+    with pytest.raises(ValueError) as exc:
+        load_config(path)
+    message = str(exc.value)
+    assert "retry_max_attempts" in message and "expected yes/no" in message and "unknown configuration key" in message
+
+
+def test_exclusion_wins(tmp_path):
+    config = write_config(tmp_path).read_text().replace("talkgroups = 8000-8999, 9056, 17344", "talkgroups = *", 1).replace("exclude_talkgroups =\n\n[rdio:fleetnet-opp-tac]", "exclude_talkgroups = 9056\n\n[rdio:fleetnet-opp-tac]", 1)
+    path = tmp_path / "exclude.conf"; path.write_text(config)
+    settings = load_config(path)
+    route = next(d for d in settings.destinations if d.type == "rdio")
+    assert route.matches(8000) and not route.matches(9056)
+
+
+def test_migration_example_is_valid():
+    path = Path(__file__).parents[1] / "config/migration-profiles.conf.example"
+    settings = load_config(path)
+    assert {"ems-paging", "renfrew-fire-paging", "fleetnet-kingston", "fleetnet-multi-site", "fleetnet-pembroke", "kingston-area-paging", "ottawa-renfrew-lanark-paging"} <= set(settings.profiles)
+    assert {100, 101, 102, 103, 104, 105} <= {int(d.system_id) for d in settings.destinations if d.type == "rdio" and d.profile == "fleetnet-pembroke"}
+
+
 def test_enabled_placeholder_is_rejected(tmp_path):
     bad = write_config(tmp_path).read_text().replace("enabled = no\nprofile = p\nurl", "enabled = yes\nprofile = p\nurl", 1)
     path = tmp_path / "bad.conf"; path.write_text(bad)

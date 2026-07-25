@@ -5,5 +5,7 @@ logs/
 *.pyc
 __pycache__/
 .pytest_cache/
+.coverage
+htmlcov/
 *.egg-info/
 .venv/

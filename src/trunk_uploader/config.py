@@ -122,6 +122,17 @@ def _credential(value: str) -> bool:
     return lowered not in PLACEHOLDERS and not lowered.startswith("change") and not lowered.startswith("<")
 
 
+def _int_setting(options: configparser.SectionProxy | dict, key: str, default: str, errors: list[str]) -> int:
+    value = options.get(key, default)
+    try:
+        result = int(value)
+        if result < 0: raise ValueError
+        return result
+    except (TypeError, ValueError):
+        errors.append(f"[general] {key}: expected a non-negative integer, got {value!r}")
+        return int(default)
+
+
 def load_config(path: str | Path, validate_only: bool = False) -> Settings:
     path = Path(path)
     parser = configparser.ConfigParser(interpolation=None, strict=True)
@@ -202,5 +213,10 @@ def load_config(path: str | Path, validate_only: bool = False) -> Settings:
         for i, left in enumerate(routes):
             for right in routes[i + 1:]:
                 if rules_overlap(left.talkgroups, right.talkgroups): errors.append(f"[{profile}] overlapping Rdio routes {left.name} and {right.name}")
+    retry_max_attempts = _int_setting(general, "retry_max_attempts", "8", errors)
+    retry_base_seconds = _int_setting(general, "retry_base_seconds", "30", errors)
+    retry_max_seconds = _int_setting(general, "retry_max_seconds", "3600", errors)
+    if retry_max_attempts == 0: errors.append("[general] retry_max_attempts must be greater than zero")
+    if retry_max_seconds < retry_base_seconds: errors.append("[general] retry_max_seconds must be at least retry_base_seconds")
     if errors: raise ValueError("configuration validation failed:\n" + "\n".join(f"- {e}" for e in errors))
-    return Settings(path, default_profile, database, spool, general.get("log_level", "INFO"), general.get("ffmpeg", "/usr/bin/ffmpeg"), general.get("mp3_bitrate", "64k"), int(general.get("retry_max_attempts", "8")), int(general.get("retry_base_seconds", "30")), int(general.get("retry_max_seconds", "3600")), methods, profiles, tuple(destinations))
+    return Settings(path, default_profile, database, spool, general.get("log_level", "INFO"), general.get("ffmpeg", "/usr/bin/ffmpeg"), general.get("mp3_bitrate", "64k"), retry_max_attempts, retry_base_seconds, retry_max_seconds, methods, profiles, tuple(destinations))

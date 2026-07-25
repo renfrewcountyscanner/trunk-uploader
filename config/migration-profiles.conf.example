@@ -1,4 +1,26 @@
-# Sanitized migration profile inventory. All destinations are disabled until reviewed.
+# Sanitized migration configuration derived from the active reference archives.
+# Every destination is disabled until URLs, credentials, and talkgroups are reviewed.
+[general]
+config_version = 1
+default_profile = fleetnet-pembroke
+database = data/uploader.sqlite3
+spool_dir = spool
+log_level = INFO
+ffmpeg = /usr/bin/ffmpeg
+mp3_bitrate = 64k
+retry_max_attempts = 8
+retry_base_seconds = 30
+retry_max_seconds = 3600
+
+[method:rdio]
+enabled = yes
+
+[method:icad]
+enabled = yes
+
+[method:trunk-recording]
+enabled = yes
+
 [profile:ems-paging]
 enabled = yes
 rdio_enabled = yes
@@ -40,3 +62,260 @@ enabled = yes
 rdio_enabled = yes
 icad_enabled = yes
 trunk_recording_enabled = no
+
+[rdio:ems-paging-rdio]
+enabled = no
+profile = ems-paging
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 1
+talkgroups = *
+exclude_talkgroups =
+
+[rdio:renfrew-fire-rdio]
+enabled = no
+profile = renfrew-fire-paging
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 2
+talkgroups = *
+exclude_talkgroups =
+
+[icad:renfrew-fire-icad]
+enabled = no
+profile = renfrew-fire-paging
+url = https://icad.example.invalid/api/call-upload
+api_key = CHANGE_ME
+system_id = 2
+protocol = call-upload
+talkgroups = *
+exclude_talkgroups =
+
+[rdio:fleetnet-kingston-system-100]
+enabled = no
+profile = fleetnet-kingston
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 100
+talkgroups = 8000-8999, 9056, 17344
+exclude_talkgroups =
+
+[rdio:fleetnet-kingston-system-101]
+enabled = no
+profile = fleetnet-kingston
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 101
+talkgroups = 9000-9999
+exclude_talkgroups =
+
+[rdio:fleetnet-kingston-system-102]
+enabled = no
+profile = fleetnet-kingston
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 102
+talkgroups = 34000-36999
+exclude_talkgroups =
+
+[rdio:fleetnet-kingston-system-103]
+enabled = no
+profile = fleetnet-kingston
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 103
+talkgroups = 3000-3999
+exclude_talkgroups =
+
+[rdio:fleetnet-kingston-system-104]
+enabled = no
+profile = fleetnet-kingston
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 104
+talkgroups = 38000-38999
+exclude_talkgroups =
+
+[rdio:fleetnet-kingston-system-105]
+enabled = no
+profile = fleetnet-kingston
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 105
+talkgroups = 2000-2999
+exclude_talkgroups =
+
+[rdio:fleetnet-multi-site-system-100]
+enabled = no
+profile = fleetnet-multi-site
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 100
+talkgroups = 8000-8999, 9056, 17344
+exclude_talkgroups =
+
+[rdio:fleetnet-multi-site-system-101]
+enabled = no
+profile = fleetnet-multi-site
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 101
+talkgroups = 9000-9999
+exclude_talkgroups =
+
+[rdio:fleetnet-multi-site-system-102]
+enabled = no
+profile = fleetnet-multi-site
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 102
+talkgroups = 34000-36999
+exclude_talkgroups =
+
+[rdio:fleetnet-multi-site-system-103]
+enabled = no
+profile = fleetnet-multi-site
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 103
+talkgroups = 3000-3999
+exclude_talkgroups =
+
+[rdio:fleetnet-multi-site-system-104]
+enabled = no
+profile = fleetnet-multi-site
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 104
+talkgroups = 38000-38999
+exclude_talkgroups =
+
+[rdio:fleetnet-multi-site-system-105]
+enabled = no
+profile = fleetnet-multi-site
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 105
+talkgroups = 2000-2999
+exclude_talkgroups =
+
+[rdio:fleetnet-pembroke-system-100]
+enabled = no
+profile = fleetnet-pembroke
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 100
+talkgroups = 8000-8999, 9056, 17344
+exclude_talkgroups =
+
+[rdio:fleetnet-pembroke-system-101]
+enabled = no
+profile = fleetnet-pembroke
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 101
+talkgroups = 9000-9999
+exclude_talkgroups =
+
+[rdio:fleetnet-pembroke-system-102]
+enabled = no
+profile = fleetnet-pembroke
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 102
+talkgroups = 34000-36999
+exclude_talkgroups =
+
+[rdio:fleetnet-pembroke-system-103]
+enabled = no
+profile = fleetnet-pembroke
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 103
+talkgroups = 3000-3999
+exclude_talkgroups =
+
+[rdio:fleetnet-pembroke-system-104]
+enabled = no
+profile = fleetnet-pembroke
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 104
+talkgroups = 38000-38999
+exclude_talkgroups =
+
+[rdio:fleetnet-pembroke-system-105]
+enabled = no
+profile = fleetnet-pembroke
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 105
+talkgroups = 2000-2999
+exclude_talkgroups =
+
+[rdio:kingston-area-paging-rdio]
+enabled = no
+profile = kingston-area-paging
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 5
+talkgroups = *
+exclude_talkgroups =
+
+[icad:frontenac-paging]
+enabled = no
+profile = kingston-area-paging
+url = https://icad.example.invalid/tone_detect
+api_key = CHANGE_ME
+system_id = 10
+protocol = tone-detect
+talkgroups = 10-17
+exclude_talkgroups =
+
+[icad:lanark-paging-tone-detect]
+enabled = no
+profile = kingston-area-paging
+url = https://icad.example.invalid/tone_detect
+api_key = CHANGE_ME
+system_id = 18
+protocol = tone-detect
+talkgroups = 18
+exclude_talkgroups =
+
+[rdio:ottawa-paging]
+enabled = no
+profile = ottawa-renfrew-lanark-paging
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 2
+talkgroups = *
+exclude_talkgroups =
+
+[rdio:lanark-paging]
+enabled = no
+profile = ottawa-renfrew-lanark-paging
+url = https://radio.example.invalid
+api_key = CHANGE_ME
+system_id = 5
+talkgroups = *
+exclude_talkgroups =
+
+[icad:ottawa-renfrew-dispatch]
+enabled = no
+profile = ottawa-renfrew-lanark-paging
+url = https://icad.example.invalid/api/call-upload
+api_key = CHANGE_ME
+system_id = 2
+protocol = call-upload
+talkgroups = *
+exclude_talkgroups =
+
+[icad:lanark-dispatch]
+enabled = no
+profile = ottawa-renfrew-lanark-paging
+url = https://icad.example.invalid/api/call-upload
+api_key = CHANGE_ME
+system_id = 18
+protocol = call-upload
+talkgroups = *
+exclude_talkgroups =

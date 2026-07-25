@@ -29,3 +29,14 @@ def test_icad_headers(mock_post, tmp_path):
     result = IcadAdapter().upload(call(tmp_path), dest("icad"), call(tmp_path).audio_path)
     assert result.success
     assert mock_post.call_args.kwargs["headers"]["X-API-Key"] == "secret"
+
+
+@patch("trunk_uploader.adapters.requests.post")
+def test_http_401_and_encrypted_rdio_skip(mock_post, tmp_path):
+    response = requests.Response(); response.status_code = 401; mock_post.return_value = response
+    result = RdioAdapter().upload(call(tmp_path), dest(), call(tmp_path).audio_path)
+    assert not result.success and not result.retryable and result.status == 401
+    encrypted = call(tmp_path).__class__(**{**call(tmp_path).__dict__, "encrypted": True})
+    mock_post.reset_mock()
+    assert RdioAdapter().upload(encrypted, dest(), encrypted.audio_path).success
+    mock_post.assert_not_called()

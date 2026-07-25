@@ -46,6 +46,7 @@ class Queue:
           attempt_count INTEGER NOT NULL DEFAULT 0,
           last_attempt_time REAL,
           next_retry_time REAL,
+          processing_time REAL,
           http_status INTEGER,
           error TEXT,
           spool_dir TEXT NOT NULL,
@@ -54,6 +55,9 @@ class Queue:
           UNIQUE(call_fingerprint, destination_type, destination_name)
         );
         """)
+        columns = {row[1] for row in self.db.execute("PRAGMA table_info(destinations)")}
+        if "processing_time" not in columns:
+            self.db.execute("ALTER TABLE destinations ADD COLUMN processing_time REAL")
 
     def close(self) -> None: self.db.close()
 
@@ -91,13 +95,34 @@ class Queue:
         rows = self.db.execute("""SELECT * FROM destinations WHERE status IN ('pending','retry') AND (next_retry_time IS NULL OR next_retry_time <= ?) ORDER BY created_at LIMIT ?""", (now, limit)).fetchall()
         return [Pending(row["id"], row["call_fingerprint"], row["destination_type"], row["destination_name"], row["profile"], row["attempt_count"], Path(row["spool_dir"])) for row in rows]
 
+    def _claim_pending(self, limit: int = 100) -> list[Pending]:
+        now = time.time()
+        stale = now - 900
+        with self._lock:
+            self.db.execute("BEGIN IMMEDIATE")
+            try:
+                rows = self.db.execute("""SELECT * FROM destinations WHERE (status IN ('pending','retry') AND (next_retry_time IS NULL OR next_retry_time <= ?)) OR (status='processing' AND processing_time <= ?) ORDER BY created_at LIMIT ?""", (now, stale, limit)).fetchall()
+                for row in rows:
+                    self.db.execute("UPDATE destinations SET status='processing',processing_time=? WHERE id=?", (now, row["id"]))
+                self.db.execute("COMMIT")
+            except Exception:
+                self.db.execute("ROLLBACK")
+                raise
+        return [Pending(row["id"], row["call_fingerprint"], row["destination_type"], row["destination_name"], row["profile"], row["attempt_count"], Path(row["spool_dir"])) for row in rows]
+
     def _destination(self, item: Pending) -> Destination:
         return next(d for d in self.settings.destinations if d.type == item.destination_type and d.name == item.destination_name)
+
+    def _cleanup_converted_audio(self, fingerprint: str, spool_dir: Path) -> None:
+        remaining = self.db.execute("SELECT 1 FROM destinations WHERE call_fingerprint=? AND status IN ('pending','retry','processing') LIMIT 1", (fingerprint,)).fetchone()
+        if remaining is None:
+            converted = spool_dir / "converted.mp3"
+            if converted.exists(): converted.unlink()
 
     def process(self, limit: int = 100) -> tuple[int, int]:
         success = failed = 0
         logger = setup(self.settings.log_level)
-        for item in self.pending(limit):
+        for item in self._claim_pending(limit):
             destination = self._destination(item)
             manifest = json.loads((item.spool_dir / "call.json").read_text(encoding="utf-8"))
             audio = item.spool_dir / manifest["audio"]
@@ -118,15 +143,16 @@ class Queue:
             now = time.time()
             attempt = item.attempt_count + 1
             if result.success:
-                self.db.execute("UPDATE destinations SET status='success',attempt_count=?,last_attempt_time=?,http_status=?,error=?,completed_at=? WHERE id=?", (attempt, now, result.status, result.error, now, item.id)); success += 1
+                self.db.execute("UPDATE destinations SET status='success',attempt_count=?,last_attempt_time=?,next_retry_time=NULL,processing_time=NULL,http_status=?,error=?,completed_at=? WHERE id=?", (attempt, now, result.status, result.error, now, item.id)); success += 1
                 logger.info("success %s", result.error or "upload succeeded", extra=extra(item.fingerprint, item.profile, item.destination_type, item.destination_name))
             elif result.retryable and attempt < self.settings.retry_max_attempts:
                 delay = min(self.settings.retry_max_seconds, self.settings.retry_base_seconds * (2 ** max(0, attempt - 1)))
-                self.db.execute("UPDATE destinations SET status='retry',attempt_count=?,last_attempt_time=?,next_retry_time=?,http_status=?,error=? WHERE id=?", (attempt, now, now + delay, result.status, result.error[:500], item.id)); failed += 1
+                self.db.execute("UPDATE destinations SET status='retry',attempt_count=?,last_attempt_time=?,next_retry_time=?,processing_time=NULL,http_status=?,error=? WHERE id=?", (attempt, now, now + delay, result.status, result.error[:500], item.id)); failed += 1
                 logger.warning("retry scheduled: %s", result.error, extra=extra(item.fingerprint, item.profile, item.destination_type, item.destination_name))
             else:
-                self.db.execute("UPDATE destinations SET status='failed',attempt_count=?,last_attempt_time=?,http_status=?,error=?,completed_at=? WHERE id=?", (attempt, now, result.status, result.error[:500], now, item.id)); failed += 1
+                self.db.execute("UPDATE destinations SET status='failed',attempt_count=?,last_attempt_time=?,processing_time=NULL,http_status=?,error=?,completed_at=? WHERE id=?", (attempt, now, result.status, result.error[:500], now, item.id)); failed += 1
                 logger.error("permanent failure: %s", result.error, extra=extra(item.fingerprint, item.profile, item.destination_type, item.destination_name))
+            self._cleanup_converted_audio(item.fingerprint, item.spool_dir)
         return success, failed
 
     def rows(self) -> list[sqlite3.Row]: return self.db.execute("SELECT * FROM destinations ORDER BY created_at, id").fetchall()
