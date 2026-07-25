@@ -1,0 +1,84 @@
+from __future__ import annotations
+
+import json
+import mimetypes
+import os
+import subprocess
+from pathlib import Path
+from typing import Callable
+
+import requests
+
+from .config import Destination, Settings
+from .http import ResponseResult, classify
+from .model import Call
+
+
+def url_join(base: str, path: str) -> str:
+    return base.rstrip("/") + "/" + path.lstrip("/")
+
+
+def source_json(call: Call) -> str:
+    return json.dumps([{"pos": source.get("pos", source.get("position", 0)), "src": source.get("src", source.get("source", "")), **({"tag": source["tag"]} if source.get("tag") else {})} for source in call.sources], separators=(",", ":"))
+
+
+class RdioAdapter:
+    def upload(self, call: Call, destination: Destination, audio: Path) -> ResponseResult:
+        if call.encrypted: return ResponseResult(True, False, None, "encrypted call skipped")
+        fields = {
+            "key": destination.api_key, "system": destination.system_id, "systemLabel": call.system_short_name,
+            "talkgroup": str(call.talkgroup), "talkgroupGroup": str(call.original.get("talkgroup_group", "")),
+            "talkgroupLabel": call.talkgroup_tag, "talkgroupTag": call.talkgroup_tag,
+            "talkgroupName": call.talkgroup_description, "dateTime": str(call.start_time),
+            "frequency": str(call.frequency), "frequencies": json.dumps(call.original.get("freqList", []), separators=(",", ":")),
+            "sources": source_json(call), "patches": json.dumps(list(call.patches), separators=(",", ":")),
+        }
+        fields["audioName"] = audio.name
+        fields["audioType"] = mimetypes.guess_type(audio.name)[0] or "application/octet-stream"
+        fields = {k: v for k, v in fields.items() if v != ""}
+        mime = mimetypes.guess_type(audio.name)[0] or "application/octet-stream"
+        try:
+            with audio.open("rb") as fh:
+                response = requests.post(url_join(destination.url, "/api/call-upload"), data=fields, files={"audio": (audio.name, fh, mime)}, headers={"Expect": ""}, timeout=(15, 120))
+            return classify(response)
+        except (OSError, requests.RequestException) as exc: return classify(error=exc)
+
+
+class IcadAdapter:
+    def upload(self, call: Call, destination: Destination, audio: Path) -> ResponseResult:
+        if destination.protocol == "tone-detect":
+            field = "file"; fields = {"api_key": destination.api_key, **call.original}
+        else:
+            field = "audio"; fields = {"key": destination.api_key, "talkgroup": str(call.talkgroup), "start_time": str(call.start_time), "freq": str(call.frequency), "source": call.system_short_name, "src": call.system_short_name, "system": destination.system_id, "system_id": destination.system_id, "audio_type": call.audio_type, "talkgroup_tag": call.talkgroup_tag, "talkgroup_description": call.talkgroup_description}
+        fields = {k: v for k, v in fields.items() if v not in ("", None)}
+        try:
+            with audio.open("rb") as fh:
+                headers = {"Authorization": f"Bearer {destination.api_key}", "X-API-Key": destination.api_key}
+                response = requests.post(destination.url, data=fields, files={field: (audio.name, fh, mimetypes.guess_type(audio.name)[0] or "application/octet-stream")}, headers=headers, timeout=(15, 120))
+            return classify(response)
+        except (OSError, requests.RequestException) as exc: return classify(error=exc)
+
+
+class TrunkRecordingAdapter:
+    def __init__(self, settings: Settings, converter: Callable[[Call, Path], Path] | None = None):
+        self.settings = settings; self.converter = converter or self.convert
+
+    def convert(self, call: Call, output: Path) -> Path:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        subprocess.run([self.settings.ffmpeg, "-y", "-i", str(call.audio_path), "-ac", "1", "-codec:a", "libmp3lame", "-b:a", self.settings.mp3_bitrate, str(output)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        return output
+
+    def upload(self, call: Call, destination: Destination, audio: Path) -> ResponseResult:
+        metadata = {"apiAuthID": destination.auth_id, "apiKey": destination.api_key, "callAudioFormat": "mp3", "recordedCall": {"talkGroupInfo": {"callTargets": [{"targetid": call.talkgroup, "targetlabel": call.talkgroup_description, "targettag": call.talkgroup_tag}], "receiver": f"Trunk-Recorder {call.system_short_name}", "frequency": call.frequency, "systemid": destination.system_id}, "startTime": call.start_time, "callDuration": call.duration, "startPositionSec": "00:00:00"}}
+        headers = {"Authorization": f"Bearer {destination.api_key}", "X-API-Key": destination.api_key}
+        try:
+            response = requests.post(url_join(destination.url, "/api/callupload"), json=metadata, headers=headers, timeout=(15, 120))
+            first = classify(response)
+            if not first.success: return first
+            try: call_id = response.json().get("CallAudioID") or response.json().get("callAudioId") or response.json().get("id")
+            except (ValueError, AttributeError): call_id = None
+            if not call_id: return ResponseResult(False, False, response.status_code, "metadata response missing call identifier")
+            with audio.open("rb") as fh:
+                second = requests.post(url_join(destination.url, f"/api/callaudioupload/{call_id}"), data=fh, headers={**headers, "Content-Type": "audio/mpeg", "Content-Length": str(audio.stat().st_size)}, timeout=(15, 120))
+            return classify(second)
+        except (OSError, requests.RequestException, subprocess.SubprocessError) as exc: return classify(error=exc)
