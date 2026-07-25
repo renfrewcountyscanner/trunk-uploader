@@ -121,7 +121,26 @@ class TrunkRecordingAdapter:
 
     def upload(self, call: Call, destination: Destination, audio: Path) -> ResponseResult:
         start_time = datetime.fromtimestamp(call.start_time, timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
-        metadata = {"apiAuthID": destination.auth_id, "apiKey": destination.api_key, "callAudioFormat": "mp3", "recordedCall": {"talkGroupInfo": {"callTargets": [{"targetid": call.talkgroup, "targetlabel": call.talkgroup_description, "targettag": call.talkgroup_tag}], "receiver": f"Trunk-Recorder {call.system_short_name}", "frequency": call.frequency, "systemid": destination.system_id}, "startTime": start_time, "callDuration": call.duration, "startPositionSec": "00:00:00"}}
+        original = call.original
+        first_source = call.sources[0] if call.sources else {}
+        talkgroup_info = {
+            "callTargets": [{"targetid": call.talkgroup, "targetlabel": call.talkgroup_description, "targettag": call.talkgroup_tag}],
+            "receiver": f"Trunk-Recorder {destination.system_id}",
+            "receiverVCO": original.get("receiverVCO", original.get("receiver_vco", 0)),
+            "frequency": call.frequency,
+            "sourceid": first_source.get("src", first_source.get("source", original.get("sourceid", ""))),
+            "sourcelabel": first_source.get("label", first_source.get("tag", original.get("sourcelabel", ""))),
+            "sourcetag": first_source.get("tag", original.get("sourcetag", "")),
+            "lcn": original.get("lcn", ""),
+            "voiceservice": original.get("voiceservice", original.get("voice_service", "")),
+            "systemid": destination.system_id,
+            "systemlabel": original.get("systemlabel", call.system_short_name),
+            "systemtype": original.get("systemtype", original.get("system_type", "")),
+            "siteid": original.get("siteid", original.get("site_id", "")),
+            "sitelabel": original.get("sitelabel", original.get("site_label", "")),
+            "calltype": original.get("calltype", original.get("call_type", "1")),
+        }
+        metadata = {"apiAuthID": destination.auth_id, "apiKey": destination.api_key, "callAudioFormat": "mp3", "recordedCall": {"talkGroupInfo": talkgroup_info, "startTime": start_time, "callDuration": call.duration, "startPositionSec": "00:00:00"}}
         headers = {"Authorization": f"Bearer {destination.api_key}", "X-API-Key": destination.api_key}
         try:
             response = requests.post(url_join(destination.url, "/api/callupload"), json=metadata, headers=headers, timeout=(15, 120))

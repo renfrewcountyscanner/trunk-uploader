@@ -78,6 +78,22 @@ def test_trunk_recording_uses_legacy_iso_start_time(mock_post, tmp_path):
 
 
 @patch("trunk_uploader.adapters.requests.post")
+def test_trunk_recording_sends_complete_legacy_talkgroup_info(mock_post, tmp_path):
+    metadata = requests.Response(); metadata.status_code = 200; metadata._content = b'{"CallAudioID":"id"}'
+    audio = requests.Response(); audio.status_code = 200
+    mock_post.side_effect = [metadata, audio]
+    output = tmp_path / "converted.mp3"; output.write_bytes(b"mp3")
+    call_obj = call(tmp_path).__class__(**{**call(tmp_path).__dict__, "system_short_name": "renfrew", "sources": ({"src": 1234, "tag": "Unit"},)})
+    result = TrunkRecordingAdapter(SimpleNamespace(ffmpeg="/usr/bin/ffmpeg", mp3_bitrate="64k"), converter=lambda call, path: path).upload(call_obj, dest("trunk-recording"), output)
+    info = mock_post.call_args_list[0].kwargs["json"]["recordedCall"]["talkGroupInfo"]
+    assert result.success
+    assert info["receiver"] == "Trunk-Recorder 2"
+    assert info["systemid"] == "2"
+    assert info["sourceid"] == 1234
+    assert {"receiverVCO", "sourcelabel", "sourcetag", "systemlabel", "systemtype", "siteid", "sitelabel", "calltype"}.issubset(info)
+
+
+@patch("trunk_uploader.adapters.requests.post")
 def test_trunk_recording_rejects_invalid_api_request_identifier(mock_post, tmp_path):
     metadata = requests.Response(); metadata.status_code = 200; metadata._content = b'{"CallAudioID":"Invalid API request"}'
     mock_post.return_value = metadata
