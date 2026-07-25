@@ -1,0 +1,42 @@
+# Sanitized migration profile inventory. All destinations are disabled until reviewed.
+[profile:ems-paging]
+enabled = yes
+rdio_enabled = yes
+icad_enabled = yes
+trunk_recording_enabled = no
+
+[profile:renfrew-fire-paging]
+enabled = yes
+rdio_enabled = yes
+icad_enabled = yes
+trunk_recording_enabled = no
+
+[profile:fleetnet-kingston]
+enabled = yes
+rdio_enabled = yes
+icad_enabled = yes
+trunk_recording_enabled = yes
+
+[profile:fleetnet-multi-site]
+enabled = yes
+rdio_enabled = yes
+icad_enabled = yes
+trunk_recording_enabled = yes
+
+[profile:fleetnet-pembroke]
+enabled = yes
+rdio_enabled = yes
+icad_enabled = yes
+trunk_recording_enabled = yes
+
+[profile:kingston-area-paging]
+enabled = yes
+rdio_enabled = yes
+icad_enabled = yes
+trunk_recording_enabled = no
+
+[profile:ottawa-renfrew-lanark-paging]
+enabled = yes
+rdio_enabled = yes
+icad_enabled = yes
+trunk_recording_enabled = no

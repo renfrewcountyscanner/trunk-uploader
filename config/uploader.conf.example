@@ -1,0 +1,64 @@
+[general]
+config_version = 1
+default_profile = fleetnet-pembroke
+database = data/uploader.sqlite3
+spool_dir = spool
+log_level = INFO
+ffmpeg = /usr/bin/ffmpeg
+mp3_bitrate = 64k
+retry_max_attempts = 8
+retry_base_seconds = 30
+retry_max_seconds = 3600
+
+[method:rdio]
+enabled = no
+
+[method:icad]
+enabled = no
+
+[method:trunk-recording]
+enabled = no
+
+[profile:fleetnet-pembroke]
+enabled = yes
+rdio_enabled = yes
+icad_enabled = no
+trunk_recording_enabled = yes
+
+[rdio:fleetnet-opp]
+enabled = no
+profile = fleetnet-pembroke
+url = https://scanner.example.invalid
+api_key = CHANGE_ME
+system_id = 100
+talkgroups = 8000-8999, 9056, 17344
+exclude_talkgroups =
+
+[rdio:fleetnet-opp-tac]
+enabled = no
+profile = fleetnet-pembroke
+url = https://scanner.example.invalid
+api_key = CHANGE_ME
+system_id = 101
+talkgroups = 9000-9999
+exclude_talkgroups =
+
+[icad:renfrew]
+enabled = no
+profile = fleetnet-pembroke
+url = https://icad.example.invalid/api/call-upload
+api_key = CHANGE_ME
+system_id = 2
+protocol = call-upload
+talkgroups = *
+exclude_talkgroups =
+
+[trunk-recording:public]
+enabled = no
+profile = fleetnet-pembroke
+url = https://record.example.invalid
+api_key = CHANGE_ME
+auth_id = CHANGE_ME
+system_id = 100
+talkgroups = *
+exclude_talkgroups =
