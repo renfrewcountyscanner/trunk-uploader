@@ -4,6 +4,7 @@ import json
 import mimetypes
 import os
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
@@ -35,7 +36,9 @@ def _call_identifier(response: requests.Response) -> str | None:
         if isinstance(value, dict):
             for key, item in value.items():
                 if str(key).replace("_", "").replace("-", "").lower() in names and item not in (None, ""):
-                    return str(item)
+                    candidate = str(item).strip()
+                    if candidate.lower() not in {"invalid api request", "invalid callaudioid", "none", "null"}:
+                        return candidate
             for item in value.values():
                 found = find(item)
                 if found:
@@ -46,7 +49,9 @@ def _call_identifier(response: requests.Response) -> str | None:
                 if found:
                     return found
         elif isinstance(value, str) and value.strip():
-            return value.strip()
+            candidate = value.strip()
+            if candidate.lower() not in {"invalid api request", "invalid callaudioid", "none", "null"}:
+                return candidate
         return None
 
     found = find(payload)
@@ -56,11 +61,14 @@ def _call_identifier(response: requests.Response) -> str | None:
     location = response.headers.get("Location", "").rstrip("/")
     if location:
         candidate = location.rsplit("/", 1)[-1]
-        if candidate:
+        if candidate and candidate.lower() not in {"invalid api request", "invalid callaudioid", "none", "null"}:
             return candidate
 
+    if payload is not None:
+        return None
+
     text = response.text.strip()
-    if text and len(text) <= 256 and "<" not in text and "\n" not in text and "\r" not in text:
+    if text and len(text) <= 256 and "<" not in text and "\n" not in text and "\r" not in text and text.lower() not in {"invalid api request", "invalid callaudioid", "none", "null"}:
         return text
     return None
 
@@ -112,7 +120,8 @@ class TrunkRecordingAdapter:
         return output
 
     def upload(self, call: Call, destination: Destination, audio: Path) -> ResponseResult:
-        metadata = {"apiAuthID": destination.auth_id, "apiKey": destination.api_key, "callAudioFormat": "mp3", "recordedCall": {"talkGroupInfo": {"callTargets": [{"targetid": call.talkgroup, "targetlabel": call.talkgroup_description, "targettag": call.talkgroup_tag}], "receiver": f"Trunk-Recorder {call.system_short_name}", "frequency": call.frequency, "systemid": destination.system_id}, "startTime": call.start_time, "callDuration": call.duration, "startPositionSec": "00:00:00"}}
+        start_time = datetime.fromtimestamp(call.start_time, timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
+        metadata = {"apiAuthID": destination.auth_id, "apiKey": destination.api_key, "callAudioFormat": "mp3", "recordedCall": {"talkGroupInfo": {"callTargets": [{"targetid": call.talkgroup, "targetlabel": call.talkgroup_description, "targettag": call.talkgroup_tag}], "receiver": f"Trunk-Recorder {call.system_short_name}", "frequency": call.frequency, "systemid": destination.system_id}, "startTime": start_time, "callDuration": call.duration, "startPositionSec": "00:00:00"}}
         headers = {"Authorization": f"Bearer {destination.api_key}", "X-API-Key": destination.api_key}
         try:
             response = requests.post(url_join(destination.url, "/api/callupload"), json=metadata, headers=headers, timeout=(15, 120))

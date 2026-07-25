@@ -64,3 +64,24 @@ def test_trunk_recording_accepts_plain_text_identifier(mock_post, tmp_path):
     result = TrunkRecordingAdapter(SimpleNamespace(ffmpeg="/usr/bin/ffmpeg", mp3_bitrate="64k"), converter=lambda call, path: path).upload(call(tmp_path), dest("trunk-recording"), output)
     assert result.success
     assert mock_post.call_args_list[1].args[0].endswith("/api/callaudioupload/plain-id")
+
+
+@patch("trunk_uploader.adapters.requests.post")
+def test_trunk_recording_uses_legacy_iso_start_time(mock_post, tmp_path):
+    metadata = requests.Response(); metadata.status_code = 200; metadata._content = b'{"CallAudioID":"id"}'
+    audio = requests.Response(); audio.status_code = 200
+    mock_post.side_effect = [metadata, audio]
+    output = tmp_path / "converted.mp3"; output.write_bytes(b"mp3")
+    result = TrunkRecordingAdapter(SimpleNamespace(ffmpeg="/usr/bin/ffmpeg", mp3_bitrate="64k"), converter=lambda call, path: path).upload(call(tmp_path), dest("trunk-recording"), output)
+    assert result.success
+    assert mock_post.call_args_list[0].kwargs["json"]["recordedCall"]["startTime"] == "1970-01-01T00:00:01.000000Z"
+
+
+@patch("trunk_uploader.adapters.requests.post")
+def test_trunk_recording_rejects_invalid_api_request_identifier(mock_post, tmp_path):
+    metadata = requests.Response(); metadata.status_code = 200; metadata._content = b'{"CallAudioID":"Invalid API request"}'
+    mock_post.return_value = metadata
+    output = tmp_path / "converted.mp3"; output.write_bytes(b"mp3")
+    result = TrunkRecordingAdapter(SimpleNamespace(ffmpeg="/usr/bin/ffmpeg", mp3_bitrate="64k"), converter=lambda call, path: path).upload(call(tmp_path), dest("trunk-recording"), output)
+    assert not result.success
+    mock_post.assert_called_once()
