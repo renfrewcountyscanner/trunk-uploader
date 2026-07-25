@@ -22,6 +22,49 @@ def source_json(call: Call) -> str:
     return json.dumps([{"pos": source.get("pos", source.get("position", 0)), "src": source.get("src", source.get("source", "")), **({"tag": source["tag"]} if source.get("tag") else {})} for source in call.sources], separators=(",", ":"))
 
 
+def _call_identifier(response: requests.Response) -> str | None:
+    """Extract a Trunk Recording call identifier from compatible responses."""
+    try:
+        payload = response.json()
+    except (ValueError, requests.exceptions.JSONDecodeError):
+        payload = None
+
+    names = {"callaudioid", "callid", "id", "identifier"}
+
+    def find(value: object) -> str | None:
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if str(key).replace("_", "").replace("-", "").lower() in names and item not in (None, ""):
+                    return str(item)
+            for item in value.values():
+                found = find(item)
+                if found:
+                    return found
+        elif isinstance(value, list):
+            for item in value:
+                found = find(item)
+                if found:
+                    return found
+        elif isinstance(value, str) and value.strip():
+            return value.strip()
+        return None
+
+    found = find(payload)
+    if found:
+        return found
+
+    location = response.headers.get("Location", "").rstrip("/")
+    if location:
+        candidate = location.rsplit("/", 1)[-1]
+        if candidate:
+            return candidate
+
+    text = response.text.strip()
+    if text and len(text) <= 256 and "<" not in text and "\n" not in text and "\r" not in text:
+        return text
+    return None
+
+
 class RdioAdapter:
     def upload(self, call: Call, destination: Destination, audio: Path) -> ResponseResult:
         if call.encrypted: return ResponseResult(True, False, None, "encrypted call skipped")
@@ -75,8 +118,7 @@ class TrunkRecordingAdapter:
             response = requests.post(url_join(destination.url, "/api/callupload"), json=metadata, headers=headers, timeout=(15, 120))
             first = classify(response)
             if not first.success: return first
-            try: call_id = response.json().get("CallAudioID") or response.json().get("callAudioId") or response.json().get("id")
-            except (ValueError, AttributeError): call_id = None
+            call_id = _call_identifier(response)
             if not call_id: return ResponseResult(False, False, response.status_code, "metadata response missing call identifier")
             with audio.open("rb") as fh:
                 second = requests.post(url_join(destination.url, f"/api/callaudioupload/{call_id}"), data=fh, headers={**headers, "Content-Type": "audio/mpeg", "Content-Length": str(audio.stat().st_size)}, timeout=(15, 120))

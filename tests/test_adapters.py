@@ -1,7 +1,8 @@
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 import requests
-from trunk_uploader.adapters import RdioAdapter, IcadAdapter, url_join
+from trunk_uploader.adapters import RdioAdapter, IcadAdapter, TrunkRecordingAdapter, url_join
 from trunk_uploader.config import Destination, parse_talkgroups
 from trunk_uploader.model import Call
 
@@ -40,3 +41,26 @@ def test_http_401_and_encrypted_rdio_skip(mock_post, tmp_path):
     mock_post.reset_mock()
     assert RdioAdapter().upload(encrypted, dest(), encrypted.audio_path).success
     mock_post.assert_not_called()
+
+
+@patch("trunk_uploader.adapters.requests.post")
+def test_trunk_recording_accepts_identifier_casing_and_nested_json(mock_post, tmp_path):
+    metadata = requests.Response(); metadata.status_code = 200
+    metadata._content = b'{"data": {"callAudioID": "nested-id"}}'
+    audio = requests.Response(); audio.status_code = 200
+    mock_post.side_effect = [metadata, audio]
+    output = tmp_path / "converted.mp3"; output.write_bytes(b"mp3")
+    result = TrunkRecordingAdapter(SimpleNamespace(ffmpeg="/usr/bin/ffmpeg", mp3_bitrate="64k"), converter=lambda call, path: path).upload(call(tmp_path), dest("trunk-recording"), output)
+    assert result.success
+    assert mock_post.call_args_list[1].args[0].endswith("/api/callaudioupload/nested-id")
+
+
+@patch("trunk_uploader.adapters.requests.post")
+def test_trunk_recording_accepts_plain_text_identifier(mock_post, tmp_path):
+    metadata = requests.Response(); metadata.status_code = 200; metadata._content = b"plain-id"
+    audio = requests.Response(); audio.status_code = 200
+    mock_post.side_effect = [metadata, audio]
+    output = tmp_path / "converted.mp3"; output.write_bytes(b"mp3")
+    result = TrunkRecordingAdapter(SimpleNamespace(ffmpeg="/usr/bin/ffmpeg", mp3_bitrate="64k"), converter=lambda call, path: path).upload(call(tmp_path), dest("trunk-recording"), output)
+    assert result.success
+    assert mock_post.call_args_list[1].args[0].endswith("/api/callaudioupload/plain-id")
