@@ -6,6 +6,10 @@ spool_dir = spool
 log_level = INFO
 ffmpeg = /usr/bin/ffmpeg
 mp3_bitrate = 64k
+timezone = America/Toronto
+# Hold newly queued calls briefly so concurrent invocations can be uploaded
+# in call start-time order. Set to 0 to disable the ordering hold.
+ordering_delay_seconds = 0
 retry_max_attempts = 8
 retry_base_seconds = 30
 retry_max_seconds = 3600

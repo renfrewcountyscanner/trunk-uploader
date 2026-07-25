@@ -25,6 +25,14 @@ def test_rdio_202_and_url(mock_post, tmp_path):
 
 
 @patch("trunk_uploader.adapters.requests.post")
+def test_rdio_sends_offset_bearing_local_datetime(mock_post, tmp_path):
+    response = requests.Response(); response.status_code = 202; mock_post.return_value = response
+    result = RdioAdapter("America/Toronto").upload(call(tmp_path), dest(), call(tmp_path).audio_path)
+    assert result.success
+    assert mock_post.call_args.kwargs["data"]["dateTime"] == "1969-12-31T19:00:01-05:00"
+
+
+@patch("trunk_uploader.adapters.requests.post")
 def test_icad_headers(mock_post, tmp_path):
     response = requests.Response(); response.status_code = 200; mock_post.return_value = response
     result = IcadAdapter().upload(call(tmp_path), dest("icad"), call(tmp_path).audio_path)

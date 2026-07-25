@@ -50,6 +50,7 @@ class Queue:
           http_status INTEGER,
           error TEXT,
           spool_dir TEXT NOT NULL,
+          call_start_time REAL NOT NULL DEFAULT 0,
           created_at REAL NOT NULL,
           completed_at REAL,
           UNIQUE(call_fingerprint, destination_type, destination_name)
@@ -58,6 +59,8 @@ class Queue:
         columns = {row[1] for row in self.db.execute("PRAGMA table_info(destinations)")}
         if "processing_time" not in columns:
             self.db.execute("ALTER TABLE destinations ADD COLUMN processing_time REAL")
+        if "call_start_time" not in columns:
+            self.db.execute("ALTER TABLE destinations ADD COLUMN call_start_time REAL NOT NULL DEFAULT 0")
 
     def close(self) -> None: self.db.close()
 
@@ -86,13 +89,13 @@ class Queue:
             now = time.time(); inserted = 0
             with self.db:
                 for destination in destinations:
-                    cur = self.db.execute("""INSERT OR IGNORE INTO destinations(call_fingerprint,destination_type,destination_name,profile,spool_dir,created_at) VALUES(?,?,?,?,?,?)""", (call.fingerprint, destination.type, destination.name, profile, str(spool), now))
+                    cur = self.db.execute("""INSERT OR IGNORE INTO destinations(call_fingerprint,destination_type,destination_name,profile,spool_dir,call_start_time,next_retry_time,created_at) VALUES(?,?,?,?,?,?,?,?)""", (call.fingerprint, destination.type, destination.name, profile, str(spool), call.start_time, now + self.settings.ordering_delay_seconds, now))
                     inserted += cur.rowcount
             return inserted
 
     def pending(self, limit: int = 100, now: float | None = None) -> list[Pending]:
         now = time.time() if now is None else now
-        rows = self.db.execute("""SELECT * FROM destinations WHERE status IN ('pending','retry') AND (next_retry_time IS NULL OR next_retry_time <= ?) ORDER BY created_at LIMIT ?""", (now, limit)).fetchall()
+        rows = self.db.execute("""SELECT * FROM destinations WHERE status IN ('pending','retry') AND (next_retry_time IS NULL OR next_retry_time <= ?) ORDER BY call_start_time, created_at, id LIMIT ?""", (now, limit)).fetchall()
         return [Pending(row["id"], row["call_fingerprint"], row["destination_type"], row["destination_name"], row["profile"], row["attempt_count"], Path(row["spool_dir"])) for row in rows]
 
     def _claim_pending(self, limit: int = 100) -> list[Pending]:
@@ -101,7 +104,7 @@ class Queue:
         with self._lock:
             self.db.execute("BEGIN IMMEDIATE")
             try:
-                rows = self.db.execute("""SELECT * FROM destinations WHERE (status IN ('pending','retry') AND (next_retry_time IS NULL OR next_retry_time <= ?)) OR (status='processing' AND processing_time <= ?) ORDER BY created_at LIMIT ?""", (now, stale, limit)).fetchall()
+                rows = self.db.execute("""SELECT * FROM destinations WHERE (status IN ('pending','retry') AND (next_retry_time IS NULL OR next_retry_time <= ?)) OR (status='processing' AND processing_time <= ?) ORDER BY call_start_time, created_at, id LIMIT ?""", (now, stale, limit)).fetchall()
                 for row in rows:
                     self.db.execute("UPDATE destinations SET status='processing',processing_time=? WHERE id=?", (now, row["id"]))
                 self.db.execute("COMMIT")
@@ -130,7 +133,7 @@ class Queue:
             m4a = item.spool_dir / manifest["m4a"] if manifest.get("m4a") else None
             call = normalize(audio, metadata, m4a)
             try:
-                if destination.type == "rdio": result = RdioAdapter().upload(call, destination, m4a if m4a and m4a.is_file() else audio)
+                if destination.type == "rdio": result = RdioAdapter(self.settings.timezone).upload(call, destination, m4a if m4a and m4a.is_file() else audio)
                 elif destination.type == "icad": result = IcadAdapter().upload(call, destination, audio)
                 else:
                     mp3 = item.spool_dir / "converted.mp3"
@@ -155,4 +158,4 @@ class Queue:
             self._cleanup_converted_audio(item.fingerprint, item.spool_dir)
         return success, failed
 
-    def rows(self) -> list[sqlite3.Row]: return self.db.execute("SELECT * FROM destinations ORDER BY created_at, id").fetchall()
+    def rows(self) -> list[sqlite3.Row]: return self.db.execute("SELECT * FROM destinations ORDER BY call_start_time, created_at, id").fetchall()

@@ -1,6 +1,7 @@
 import json
 import threading
 import wave
+from dataclasses import replace
 from pathlib import Path
 from trunk_uploader.config import load_config
 from trunk_uploader.model import normalize
@@ -37,6 +38,18 @@ def test_concurrent_queue_insertion_is_deduplicated(tmp_path):
     for thread in threads: thread.start()
     for thread in threads: thread.join()
     assert sum(results) == 1 and len(queue.rows()) == 1
+    queue.close()
+
+
+def test_pending_queue_is_ordered_by_call_start_time(tmp_path):
+    settings, call = setup(tmp_path); queue = Queue(settings)
+    later = call
+    earlier = replace(call, start_time=call.start_time - 100, fingerprint="earlier-fingerprint")
+    destination = next(d for d in settings.destinations if d.type == "rdio")
+    queue.enqueue(later, "p", [destination])
+    queue.enqueue(earlier, "p", [destination])
+    pending = queue.pending(now=10**12)
+    assert [item.fingerprint for item in pending] == [earlier.fingerprint, later.fingerprint]
     queue.close()
 
 

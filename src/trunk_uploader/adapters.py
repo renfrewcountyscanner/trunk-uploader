@@ -7,6 +7,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
+from zoneinfo import ZoneInfo
 
 import requests
 
@@ -74,13 +75,16 @@ def _call_identifier(response: requests.Response) -> str | None:
 
 
 class RdioAdapter:
+    def __init__(self, timezone_name: str = "UTC"):
+        self.timezone = ZoneInfo(timezone_name)
+
     def upload(self, call: Call, destination: Destination, audio: Path) -> ResponseResult:
         if call.encrypted: return ResponseResult(True, False, None, "encrypted call skipped")
         fields = {
             "key": destination.api_key, "system": destination.system_id, "systemLabel": call.system_short_name,
             "talkgroup": str(call.talkgroup), "talkgroupGroup": str(call.original.get("talkgroup_group", "")),
             "talkgroupLabel": call.talkgroup_tag, "talkgroupTag": call.talkgroup_tag,
-            "talkgroupName": call.talkgroup_description, "dateTime": str(call.start_time),
+            "talkgroupName": call.talkgroup_description, "dateTime": datetime.fromtimestamp(call.start_time, self.timezone).isoformat(timespec="seconds"),
             "frequency": str(call.frequency), "frequencies": json.dumps(call.original.get("freqList", []), separators=(",", ":")),
             "sources": source_json(call), "patches": json.dumps(list(call.patches), separators=(",", ":")),
         }
