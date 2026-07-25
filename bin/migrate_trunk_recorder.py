@@ -144,7 +144,7 @@ def migrate(legacy: dict[str, Any], legacy_path: Path, output_path: Path, upload
     return parser, migrated
 
 
-def add_trunk_recording(parser: configparser.ConfigParser, source: Path, profile: str, system_id: str, receiver_name: str | None = None) -> None:
+def add_trunk_recording(parser: configparser.ConfigParser, source: Path, profile: str, system_id: str, receiver_name: str | None = None, auth_id: str | None = None) -> None:
     """Copy one existing trunk-recording destination without printing secrets."""
     source_parser = configparser.ConfigParser(interpolation=None)
     source_parser.read(source)
@@ -159,7 +159,7 @@ def add_trunk_recording(parser: configparser.ConfigParser, source: Path, profile
         "profile": profile,
         "url": old.get("url", ""),
         "api_key": old.get("api_key", ""),
-        "auth_id": old.get("auth_id", ""),
+        "auth_id": auth_id or old.get("auth_id", ""),
         "system_id": system_id,
         "receiver_name": receiver_name or system_id,
         "talkgroups": "*",
@@ -196,6 +196,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--trunk-recording-profile", default="", help="profile receiving the Trunk Recording route")
     parser.add_argument("--trunk-recording-system-id", default="", help="system/receiver identity for Trunk Recording")
     parser.add_argument("--trunk-recording-receiver-name", default="", help="display name sent as the Trunk Recording receiver")
+    parser.add_argument("--trunk-recording-auth-id", default="", help="API auth label prepended to the receiver by Trunk Recording")
     parser.add_argument("--apply", action="store_true", help="replace each system uploadScript after making a backup")
     args = parser.parse_args(argv)
 
@@ -206,7 +207,7 @@ def main(argv: list[str] | None = None) -> int:
             profile = args.trunk_recording_profile or generated["general"]["default_profile"]
             if not args.trunk_recording_system_id:
                 raise ValueError("--trunk-recording-system-id is required when adding Trunk Recording")
-            add_trunk_recording(generated, args.trunk_recording_source_config, profile, args.trunk_recording_system_id, args.trunk_recording_receiver_name)
+            add_trunk_recording(generated, args.trunk_recording_source_config, profile, args.trunk_recording_system_id, args.trunk_recording_receiver_name, args.trunk_recording_auth_id)
             with args.output.open("w", encoding="utf-8") as handle:
                 generated.write(handle)
             os.chmod(args.output, stat.S_IRUSR | stat.S_IWUSR)
