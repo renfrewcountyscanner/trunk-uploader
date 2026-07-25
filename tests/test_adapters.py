@@ -114,6 +114,20 @@ def test_trunk_recording_uses_configured_receiver_name(mock_post, tmp_path):
 
 
 @patch("trunk_uploader.adapters.requests.post")
+def test_trunk_recording_exact_receiver_name_omits_auth_prefix(mock_post, tmp_path):
+    metadata = requests.Response(); metadata.status_code = 200; metadata._content = b'{"CallAudioID":"id"}'
+    audio = requests.Response(); audio.status_code = 200
+    mock_post.side_effect = [metadata, audio]
+    output = tmp_path / "converted.mp3"; output.write_bytes(b"mp3")
+    configured = Destination("trunk-recording", "x", True, "p", "https://example.test", "secret", "600", "SEARS", "call-upload", parse_talkgroups("*", "x"), parse_talkgroups("", "x"), {"receiver_name_exact": "yes"}, "SEARS")
+    result = TrunkRecordingAdapter(SimpleNamespace(ffmpeg="/usr/bin/ffmpeg", mp3_bitrate="64k"), converter=lambda call, path: path).upload(call(tmp_path), configured, output)
+    payload = mock_post.call_args_list[0].kwargs["json"]
+    assert result.success
+    assert payload["apiAuthID"] == "SEARS"
+    assert payload["recordedCall"]["talkGroupInfo"]["receiver"] == ""
+
+
+@patch("trunk_uploader.adapters.requests.post")
 def test_trunk_recording_rejects_invalid_api_request_identifier(mock_post, tmp_path):
     metadata = requests.Response(); metadata.status_code = 200; metadata._content = b'{"CallAudioID":"Invalid API request"}'
     mock_post.return_value = metadata

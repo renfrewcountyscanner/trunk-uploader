@@ -3,11 +3,12 @@
 [general]
 config_version = 1
 default_profile = fleetnet-pembroke
-database = data/uploader.sqlite3
-spool_dir = spool
+database = /tmp/trunk-uploader/uploader.sqlite3
+spool_dir = /tmp/trunk-uploader/spool
 log_level = INFO
 ffmpeg = /usr/bin/ffmpeg
 mp3_bitrate = 64k
+ordering_delay_seconds = 0
 retry_max_attempts = 8
 retry_base_seconds = 30
 retry_max_seconds = 3600
@@ -327,6 +328,7 @@ url = https://record.example.invalid
 api_key = CHANGE_ME
 auth_id = CHANGE_ME
 receiver_name = RENFREW-FIRE
+receiver_name_exact = yes
 system_id = PEMBROKE
 talkgroups = *
 exclude_talkgroups =

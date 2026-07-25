@@ -141,6 +141,18 @@ Review `docs/reference-analysis.md` and `config/migration-profiles.conf.example`
 
 The legacy filename regexes did not reliably implement five-digit ranges. Verify the active talkgroup metadata before enabling production routes.
 
+To migrate another Trunk Recorder v2 install, generate and review its local uploader configuration first:
+
+```sh
+python3 /app/trunk-uploader/bin/migrate_trunk_recorder.py \
+  --legacy-config /app/config.json \
+  --output /app/trunk-uploader/config/uploader.conf
+PYTHONPATH=/app/trunk-uploader/src python3 -m trunk_uploader \
+  --config /app/trunk-uploader/config/uploader.conf validate
+```
+
+After reviewing the generated routes, add `--apply` to replace the legacy upload script. The migration creates a timestamped `config.json` backup. For Trunk Recording, use `--trunk-recording-source-config`, `--trunk-recording-system-id`, `--trunk-recording-receiver-name`, and `--trunk-recording-auth-id`; the generated configuration sends the receiver identity explicitly and enables `receiver_name_exact`, preventing Trunk Recorder from prepending `apiAuthID` (for example, avoiding `SEARS-SEARS`). The generated ordering delay is `0` seconds, and the uploader queue/database are placed under `/tmp` so they do not accumulate on the recording drive.
+
 Rollback is simply restoring the previous Trunk Recorder `uploadScript` and disabling the new destinations. The uploader never modifies the source recordings.
 
 ## Tests and live-test procedure

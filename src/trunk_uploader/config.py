@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 TRUE = {"yes", "true", "on", "1"}
 FALSE = {"no", "false", "off", "0"}
 PLACEHOLDERS = {"", "change_me", "changeme", "<redacted>", "example", "example.invalid"}
-COMMON = {"enabled", "profile", "url", "api_key", "system_id", "talkgroups", "exclude_talkgroups", "receiver_name"}
+COMMON = {"enabled", "profile", "url", "api_key", "system_id", "talkgroups", "exclude_talkgroups", "receiver_name", "receiver_name_exact"}
 
 
 def parse_bool(value: str, where: str = "boolean") -> bool:
@@ -216,15 +216,28 @@ def load_config(path: str | Path, validate_only: bool = False) -> Settings:
         key = name
         if key in seen: errors.append(f"duplicate destination {kind}:{name}")
         seen.add(key)
-        required = {"enabled", "profile", "url", "api_key", "system_id", "talkgroups"}
+        required = {"enabled", "profile", "url", "system_id", "talkgroups"}
+        if kind != "icad" or opts.get("protocol", "call-upload").strip() != "tone-detect":
+            required.add("api_key")
         if kind == "trunk-recording": required |= {"auth_id"}
         _required(opts, required, section, errors)
+        exact_receiver = opts.get("receiver_name_exact", "no").strip()
+        if exact_receiver:
+            try:
+                exact_enabled = parse_bool(exact_receiver, f"[{section}] receiver_name_exact")
+            except ValueError as exc:
+                errors.append(str(exc)); exact_enabled = False
+        else:
+            exact_enabled = False
+        if enabled and kind == "trunk-recording" and exact_enabled and not opts.get("receiver_name", "").strip():
+            errors.append(f"[{section}] receiver_name is required when receiver_name_exact is enabled")
         try:
             allow = parse_talkgroups(opts.get("talkgroups", ""), f"[{section}] talkgroups")
             deny = parse_talkgroups(opts.get("exclude_talkgroups", ""), f"[{section}] exclude_talkgroups")
         except ValueError as exc: errors.append(str(exc)); allow = TalkgroupRule("", (), False); deny = allow
         if enabled:
-            if not _credential(opts.get("api_key", "")): errors.append(f"[{section}] enabled destination has placeholder api_key")
+            if not (kind == "icad" and opts.get("protocol", "call-upload").strip() == "tone-detect") and not _credential(opts.get("api_key", "")):
+                errors.append(f"[{section}] enabled destination has placeholder api_key")
             if kind == "trunk-recording" and not _credential(opts.get("auth_id", "")): errors.append(f"[{section}] enabled destination has placeholder auth_id")
             parsed = urlparse(opts.get("url", ""))
             if parsed.scheme not in {"http", "https"}: errors.append(f"[{section}] enabled destination has invalid URL")

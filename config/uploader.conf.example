@@ -1,8 +1,8 @@
 [general]
 config_version = 1
 default_profile = fleetnet-pembroke
-database = data/uploader.sqlite3
-spool_dir = spool
+database = /tmp/trunk-uploader/uploader.sqlite3
+spool_dir = /tmp/trunk-uploader/spool
 log_level = INFO
 ffmpeg = /usr/bin/ffmpeg
 mp3_bitrate = 64k
@@ -64,5 +64,6 @@ api_key = CHANGE_ME
 auth_id = CHANGE_ME
 system_id = 100
 receiver_name = FLEETNET-PEMBROKE
+receiver_name_exact = yes
 talkgroups = *
 exclude_talkgroups =
