@@ -2,17 +2,37 @@
 
 `trunk-uploader` is a production-oriented Linux uploader for Trunk Recorder. One invocation can independently deliver a call to Rdio Scanner, iCAD Dispatch, and Trunk Recording, with profile routing, talkgroup filtering, durable retries, and no mutation of the original Trunk Recorder files.
 
-## Install
+## Install and deploy without a virtual environment
 
 Requirements are Linux, Python 3.11+, and `/usr/bin/ffmpeg` for Trunk Recording destinations.
+
+The Trunk Recorder wrapper uses the system Python and the package source directly. A virtual environment is optional and is only needed for isolated development/testing.
+
+On Debian/Ubuntu:
+
+```sh
+sudo apt update
+sudo apt install -y python3 python3-requests ffmpeg
+cd /app/trunk-uploader
+cp config/uploader.conf.example config/uploader.conf
+chmod 600 config/uploader.conf   # recommended; performed manually
+```
+
+For direct CLI commands without installing the package:
+
+```sh
+export PYTHONPATH=/app/trunk-uploader/src
+python3 -m trunk_uploader --config config/uploader.conf validate
+```
+
+Optional development environment:
 
 ```sh
 cd /app/trunk-uploader
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -e '.[test]'
-cp config/uploader.conf.example config/uploader.conf
-chmod 600 config/uploader.conf   # recommended; performed manually
+python -m pytest
 ```
 
 The real configuration is ignored by Git. Keep credentials only in that file.
@@ -38,7 +58,23 @@ Validate everything at once:
 python3 -m trunk_uploader.cli --config config/uploader.conf validate
 ```
 
-## Trunk Recorder
+## Configure the uploader
+
+1. Copy `config/uploader.conf.example` to `config/uploader.conf` and protect it with mode `0600`.
+2. Edit the INI file with the real URLs, credentials, system IDs, enabled methods, enabled profiles, and talkgroup rules. Leave unreviewed destinations disabled.
+3. Validate before enabling uploads:
+
+   ```sh
+   PYTHONPATH=/app/trunk-uploader/src python3 -m trunk_uploader --config /app/trunk-uploader/config/uploader.conf validate
+   ```
+
+4. Review a copied completed call without contacting any endpoint:
+
+   ```sh
+   PYTHONPATH=/app/trunk-uploader/src python3 -m trunk_uploader --config /app/trunk-uploader/config/uploader.conf dry-run /path/to/call.wav /path/to/call.json /path/to/call.m4a
+   ```
+
+## Edit Trunk Recorder configuration
 
 Configure one script:
 
@@ -46,11 +82,30 @@ Configure one script:
 "uploadScript": "/app/trunk-uploader/bin/universal-upload.sh"
 ```
 
+Add that property inside each applicable object in the `systems` array. For example:
+
+```json
+{
+  "shortName": "fleetnet-pembroke",
+  "type": "smartnet",
+  "talkgroupsFile": "trs_tg_2560.csv",
+  "uploadScript": "/app/trunk-uploader/bin/universal-upload.sh"
+}
+```
+
 Or select an explicit profile:
 
 ```json
 "uploadScript": "/app/trunk-uploader/bin/universal-upload.sh fleetnet-pembroke"
 ```
+
+Back up `config.json` before editing and restart Trunk Recorder using the host's normal service/command afterward:
+
+```sh
+cp /path/to/trunk-recorder/config.json /path/to/trunk-recorder/config.json.backup
+```
+
+Do not also enable the old uploader scripts or Rdio plugin configuration for the same system. This wrapper replaces them.
 
 The wrapper accepts `WAV JSON [M4A]` and `PROFILE WAV JSON [M4A]`. It uses an explicit profile first, then metadata names such as `shortName`/`short_name`/`system`, then `default_profile`.
 
