@@ -129,7 +129,7 @@ class TrunkRecordingAdapter:
         first_source = call.sources[0] if call.sources else {}
         talkgroup_info = {
             "callTargets": [{"targetid": call.talkgroup, "targetlabel": call.talkgroup_description, "targettag": call.talkgroup_tag}],
-            "receiver": f"Trunk-Recorder {destination.system_id}",
+            "receiver": destination.receiver_name or destination.system_id,
             "receiverVCO": original.get("receiverVCO", original.get("receiver_vco", 0)),
             "frequency": call.frequency,
             "sourceid": first_source.get("src", first_source.get("source", original.get("sourceid", ""))),

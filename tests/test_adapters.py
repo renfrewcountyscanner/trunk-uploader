@@ -102,6 +102,18 @@ def test_trunk_recording_sends_complete_legacy_talkgroup_info(mock_post, tmp_pat
 
 
 @patch("trunk_uploader.adapters.requests.post")
+def test_trunk_recording_uses_configured_receiver_name(mock_post, tmp_path):
+    metadata = requests.Response(); metadata.status_code = 200; metadata._content = b'{"CallAudioID":"id"}'
+    audio = requests.Response(); audio.status_code = 200
+    mock_post.side_effect = [metadata, audio]
+    output = tmp_path / "converted.mp3"; output.write_bytes(b"mp3")
+    configured = Destination("trunk-recording", "x", True, "p", "https://example.test", "secret", "2", "auth", "call-upload", parse_talkgroups("*", "x"), parse_talkgroups("", "x"), {}, "RENFREW-FIRE")
+    result = TrunkRecordingAdapter(SimpleNamespace(ffmpeg="/usr/bin/ffmpeg", mp3_bitrate="64k"), converter=lambda call, path: path).upload(call(tmp_path), configured, output)
+    info = mock_post.call_args_list[0].kwargs["json"]["recordedCall"]["talkGroupInfo"]
+    assert result.success and info["receiver"] == "RENFREW-FIRE"
+
+
+@patch("trunk_uploader.adapters.requests.post")
 def test_trunk_recording_rejects_invalid_api_request_identifier(mock_post, tmp_path):
     metadata = requests.Response(); metadata.status_code = 200; metadata._content = b'{"CallAudioID":"Invalid API request"}'
     mock_post.return_value = metadata

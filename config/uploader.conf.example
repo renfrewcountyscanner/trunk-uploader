@@ -64,5 +64,6 @@ url = https://record.example.invalid
 api_key = CHANGE_ME
 auth_id = CHANGE_ME
 system_id = 100
+receiver_name = FLEETNET-PEMBROKE
 talkgroups = *
 exclude_talkgroups =

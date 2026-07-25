@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 TRUE = {"yes", "true", "on", "1"}
 FALSE = {"no", "false", "off", "0"}
 PLACEHOLDERS = {"", "change_me", "changeme", "<redacted>", "example", "example.invalid"}
-COMMON = {"enabled", "profile", "url", "api_key", "system_id", "talkgroups", "exclude_talkgroups"}
+COMMON = {"enabled", "profile", "url", "api_key", "system_id", "talkgroups", "exclude_talkgroups", "receiver_name"}
 
 
 def parse_bool(value: str, where: str = "boolean") -> bool:
@@ -88,6 +88,7 @@ class Destination:
     talkgroups: TalkgroupRule = TalkgroupRule("*", (), True)
     excludes: TalkgroupRule = TalkgroupRule("", (), False)
     extra: dict[str, str] | None = None
+    receiver_name: str = ""
 
     def matches(self, talkgroup: int) -> bool:
         return self.talkgroups.matches(talkgroup) and not self.excludes.matches(talkgroup)
@@ -227,7 +228,7 @@ def load_config(path: str | Path, validate_only: bool = False) -> Settings:
             if kind == "trunk-recording" and not _credential(opts.get("auth_id", "")): errors.append(f"[{section}] enabled destination has placeholder auth_id")
             parsed = urlparse(opts.get("url", ""))
             if parsed.scheme not in {"http", "https"}: errors.append(f"[{section}] enabled destination has invalid URL")
-        destinations.append(Destination(kind, name, enabled, profile, opts.get("url", "").strip(), opts.get("api_key", "").strip(), opts.get("system_id", "").strip(), opts.get("auth_id", "").strip(), opts.get("protocol", "call-upload").strip(), allow, deny, dict(opts)))
+        destinations.append(Destination(kind, name, enabled, profile, opts.get("url", "").strip(), opts.get("api_key", "").strip(), opts.get("system_id", "").strip(), opts.get("auth_id", "").strip(), opts.get("protocol", "call-upload").strip(), allow, deny, dict(opts), opts.get("receiver_name", "").strip()))
     for profile in profiles:
         routes = [d for d in destinations if d.type == "rdio" and d.profile == profile and d.enabled]
         for i, left in enumerate(routes):

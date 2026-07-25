@@ -326,6 +326,7 @@ profile = fleetnet-pembroke
 url = https://record.example.invalid
 api_key = CHANGE_ME
 auth_id = CHANGE_ME
+receiver_name = RENFREW-FIRE
 system_id = PEMBROKE
 talkgroups = *
 exclude_talkgroups =
