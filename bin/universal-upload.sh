@@ -12,6 +12,10 @@ is_json_path() {
   [[ "${1##*/}" == *.json || "${1##*/}" == *.JSON ]]
 }
 
+config="${TRUNK_UPLOADER_CONFIG:-$root/config/uploader.conf}"
+lock_suffix="$(printf '%s' "$config" | sha256sum | cut -c1-16)"
+lock_file="${TRUNK_UPLOADER_LOCK:-/tmp/trunk-uploader-${lock_suffix}.lock}"
+
 if [[ -f "$1" && -f "$2" ]] && is_json_path "$2"; then
   args=(upload "$@")
 else
@@ -22,4 +26,4 @@ else
   args=(upload --profile "$1" "$2" "$3")
   [[ $# -eq 4 ]] && args+=("$4")
 fi
-exec python3 -m trunk_uploader.cli --config "${TRUNK_UPLOADER_CONFIG:-$root/config/uploader.conf}" "${args[@]}"
+exec flock -x "$lock_file" python3 -m trunk_uploader.cli --config "$config" "${args[@]}"
