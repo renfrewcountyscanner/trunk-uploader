@@ -1,6 +1,6 @@
 from pathlib import Path
 import pytest
-from trunk_uploader.config import load_config, parse_bool, parse_talkgroups, rules_overlap
+from trunk_uploader.config import load_config, parse_bool, parse_talkgroups, rules_overlap, rules_overlap_effective
 
 
 def write_config(tmp_path: Path, extra=""):
@@ -22,6 +22,7 @@ def test_boolean_and_talkgroups():
 def test_overlap_detection():
     assert rules_overlap(parse_talkgroups("8000-8999", "a"), parse_talkgroups("8500", "b"))
     assert not rules_overlap(parse_talkgroups("8000-8999", "a"), parse_talkgroups("9000", "b"))
+    assert not rules_overlap_effective(parse_talkgroups("8000-8999,9056", "a"), parse_talkgroups("", "a"), parse_talkgroups("9000-9999", "b"), parse_talkgroups("9056", "b"))
 
 
 def test_config_load_and_unknown_key(tmp_path):

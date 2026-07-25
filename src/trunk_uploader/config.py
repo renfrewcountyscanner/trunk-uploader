@@ -56,6 +56,23 @@ def rules_overlap(a: TalkgroupRule, b: TalkgroupRule) -> bool:
     return any(max(x1, y1) <= min(x2, y2) for x1, x2 in a.ranges for y1, y2 in b.ranges)
 
 
+def rules_overlap_effective(a: TalkgroupRule, a_exclude: TalkgroupRule, b: TalkgroupRule, b_exclude: TalkgroupRule) -> bool:
+    """Return whether two allow/deny rules share at least one permitted ID."""
+    if a.wildcard and b.wildcard:
+        return not (a_exclude.wildcard or b_exclude.wildcard)
+    intervals = b.ranges if a.wildcard else a.ranges if b.wildcard else tuple((max(x1, y1), min(x2, y2)) for x1, x2 in a.ranges for y1, y2 in b.ranges if max(x1, y1) <= min(x2, y2))
+    exclusions = tuple(a_exclude.ranges) + tuple(b_exclude.ranges)
+    for start, end in intervals:
+        cursor = start
+        for blocked_start, blocked_end in sorted(exclusions):
+            if blocked_end < cursor or blocked_start > end: continue
+            if blocked_start > cursor: return True
+            cursor = max(cursor, blocked_end + 1)
+            if cursor > end: break
+        if cursor <= end: return True
+    return False
+
+
 @dataclass(frozen=True)
 class Destination:
     type: str
@@ -212,7 +229,7 @@ def load_config(path: str | Path, validate_only: bool = False) -> Settings:
         routes = [d for d in destinations if d.type == "rdio" and d.profile == profile and d.enabled]
         for i, left in enumerate(routes):
             for right in routes[i + 1:]:
-                if rules_overlap(left.talkgroups, right.talkgroups): errors.append(f"[{profile}] overlapping Rdio routes {left.name} and {right.name}")
+                if rules_overlap_effective(left.talkgroups, left.excludes, right.talkgroups, right.excludes): errors.append(f"[{profile}] overlapping Rdio routes {left.name} and {right.name}")
     retry_max_attempts = _int_setting(general, "retry_max_attempts", "8", errors)
     retry_base_seconds = _int_setting(general, "retry_base_seconds", "30", errors)
     retry_max_seconds = _int_setting(general, "retry_max_seconds", "3600", errors)

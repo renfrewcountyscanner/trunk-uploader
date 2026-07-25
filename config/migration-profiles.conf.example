@@ -107,7 +107,7 @@ url = https://radio.example.invalid
 api_key = CHANGE_ME
 system_id = 101
 talkgroups = 9000-9999
-exclude_talkgroups =
+exclude_talkgroups = 9056
 
 [rdio:fleetnet-kingston-system-102]
 enabled = no
@@ -161,7 +161,7 @@ url = https://radio.example.invalid
 api_key = CHANGE_ME
 system_id = 101
 talkgroups = 9000-9999
-exclude_talkgroups =
+exclude_talkgroups = 9056
 
 [rdio:fleetnet-multi-site-system-102]
 enabled = no
@@ -215,7 +215,7 @@ url = https://radio.example.invalid
 api_key = CHANGE_ME
 system_id = 101
 talkgroups = 9000-9999
-exclude_talkgroups =
+exclude_talkgroups = 9056
 
 [rdio:fleetnet-pembroke-system-102]
 enabled = no
@@ -297,6 +297,36 @@ profile = ottawa-renfrew-lanark-paging
 url = https://radio.example.invalid
 api_key = CHANGE_ME
 system_id = 5
+talkgroups = *
+exclude_talkgroups =
+
+[trunk-recording:kingston-public]
+enabled = no
+profile = fleetnet-kingston
+url = https://record.example.invalid
+api_key = CHANGE_ME
+auth_id = CHANGE_ME
+system_id = KINGSTON
+talkgroups = *
+exclude_talkgroups =
+
+[trunk-recording:multi-public]
+enabled = no
+profile = fleetnet-multi-site
+url = https://record.example.invalid
+api_key = CHANGE_ME
+auth_id = CHANGE_ME
+system_id = FLEETNET
+talkgroups = *
+exclude_talkgroups =
+
+[trunk-recording:public]
+enabled = no
+profile = fleetnet-pembroke
+url = https://record.example.invalid
+api_key = CHANGE_ME
+auth_id = CHANGE_ME
+system_id = PEMBROKE
 talkgroups = *
 exclude_talkgroups =
 

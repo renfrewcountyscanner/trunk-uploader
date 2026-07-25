@@ -41,7 +41,7 @@ url = https://scanner.example.invalid
 api_key = CHANGE_ME
 system_id = 101
 talkgroups = 9000-9999
-exclude_talkgroups =
+exclude_talkgroups = 9056
 
 [icad:renfrew]
 enabled = no
