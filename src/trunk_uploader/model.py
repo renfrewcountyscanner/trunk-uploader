@@ -39,6 +39,15 @@ class Call:
     original: dict[str, Any]
     fingerprint: str
 
+    @property
+    def talkgroup_known(self) -> bool:
+        """Whether Trunk Recorder resolved this ID from its talkgroup file."""
+        values = (
+            first(self.original, "talkgroup_tag", "talkgroupTag", "talkgroup_label", "talkgroupLabel", default=""),
+            first(self.original, "talkgroup_description", "talkgroupDescription", "talkgroup_name", "talkgroupName", default=""),
+        )
+        return any(str(value).strip().lower() not in {"", "-", "unknown", "unassigned"} for value in values)
+
 
 def normalize(audio: str | Path, metadata: str | Path, m4a: str | Path | None = None) -> Call:
     audio_path = Path(audio); json_path = Path(metadata)

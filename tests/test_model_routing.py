@@ -22,6 +22,12 @@ def test_normalization_and_stable_fingerprint(tmp_path):
     assert one.fingerprint == two.fingerprint
 
 
+def test_unresolved_talkgroup_is_not_known(tmp_path):
+    audio, metadata = files(tmp_path)
+    metadata.write_text(metadata.read_text().replace('"talkgroup_tag": "OPP", "talkgroup_description": "Dispatch"', '"talkgroup_tag": "", "talkgroup_description": ""'))
+    assert normalize(audio, metadata).talkgroup_known is False
+
+
 def test_profile_selection(tmp_path):
     audio, metadata = files(tmp_path)
     config = Path(tmp_path / "uploader.conf")

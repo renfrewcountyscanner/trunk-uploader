@@ -29,6 +29,19 @@ def test_deduplicates_destinations_and_copies_originals(tmp_path):
     queue.close()
 
 
+def test_unknown_talkgroup_is_skipped_without_uploading(tmp_path, monkeypatch):
+    settings, call = setup(tmp_path)
+    call.json_path.write_text(json.dumps({"talkgroup": 1, "short_name": "p", "start_time": 1}))
+    call = normalize(call.audio_path, call.json_path)
+    queue = Queue(settings)
+    destination = next(d for d in settings.destinations if d.type == "rdio")
+    queue.enqueue(call, "p", [destination])
+    monkeypatch.setattr(RdioAdapter, "upload", lambda *args: (_ for _ in ()).throw(AssertionError("must not upload")))
+    assert queue.process() == (0, 0)
+    assert queue.rows()[0]["status"] == "skipped"
+    queue.close()
+
+
 def test_concurrent_queue_insertion_is_deduplicated(tmp_path):
     settings, call = setup(tmp_path); queue = Queue(settings)
     destinations = [d for d in settings.destinations if d.type == "rdio"][:1]
@@ -66,6 +79,22 @@ def test_retry_backoff_and_successful_destination_not_resent(tmp_path, monkeypat
     assert queue.process() == (1, 0)
     assert queue.process() == (0, 0)
     assert len(calls) == 2
+    queue.close()
+
+
+def test_discard_failed_call_removes_spool_without_retry(tmp_path, monkeypatch):
+    settings, call = setup(tmp_path)
+    settings.path.write_text(settings.path.read_text().replace("database = /tmp/trunk-uploader/uploader.sqlite3", f"database = {tmp_path}/db.sqlite3").replace("spool_dir = /tmp/trunk-uploader/spool", f"spool_dir = {tmp_path}/spool").replace("discard_failed_calls = no", "discard_failed_calls = yes"))
+    settings = load_config(settings.path); queue = Queue(settings)
+    destination = next(d for d in settings.destinations if d.type == "rdio")
+    queue.enqueue(call, "p", [destination])
+    spool = Path(queue.rows()[0]["spool_dir"])
+    monkeypatch.setattr(RdioAdapter, "upload", lambda *args: ResponseResult(False, True, 502, "HTTP 502"))
+    assert queue.process() == (0, 1)
+    row = queue.rows()[0]
+    assert row["status"] == "failed"
+    assert not spool.exists()
+    assert queue.pending(now=10**12) == []
     queue.close()
 
 

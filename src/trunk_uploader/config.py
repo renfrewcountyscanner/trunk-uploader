@@ -115,6 +115,7 @@ class Settings:
     retry_max_attempts: int
     retry_base_seconds: int
     retry_max_seconds: int
+    discard_failed_calls: bool
     methods: dict[str, bool]
     profiles: dict[str, Profile]
     destinations: tuple[Destination, ...]
@@ -163,7 +164,7 @@ def load_config(path: str | Path, validate_only: bool = False) -> Settings:
         raise ValueError(f"cannot read configuration {path}: {exc}") from exc
     allowed_sections = {"general", "method:rdio", "method:icad", "method:trunk-recording"}
     allowed_keys = {
-        "general": {"config_version", "default_profile", "database", "spool_dir", "log_level", "ffmpeg", "mp3_bitrate", "timezone", "ordering_delay_seconds", "retry_max_attempts", "retry_base_seconds", "retry_max_seconds"},
+        "general": {"config_version", "default_profile", "database", "spool_dir", "log_level", "ffmpeg", "mp3_bitrate", "timezone", "ordering_delay_seconds", "retry_max_attempts", "retry_base_seconds", "retry_max_seconds", "discard_failed_calls"},
         "profile": {"enabled", "rdio_enabled", "icad_enabled", "trunk_recording_enabled"},
         "method": {"enabled"},
         "rdio": COMMON,
@@ -251,10 +252,12 @@ def load_config(path: str | Path, validate_only: bool = False) -> Settings:
     retry_base_seconds = _int_setting(general, "retry_base_seconds", "30", errors)
     retry_max_seconds = _int_setting(general, "retry_max_seconds", "3600", errors)
     ordering_delay_seconds = _int_setting(general, "ordering_delay_seconds", "0", errors)
+    try: discard_failed_calls = parse_bool(general.get("discard_failed_calls", "no"), "[general] discard_failed_calls")
+    except ValueError as exc: errors.append(str(exc)); discard_failed_calls = False
     if retry_max_attempts == 0: errors.append("[general] retry_max_attempts must be greater than zero")
     if retry_max_seconds < retry_base_seconds: errors.append("[general] retry_max_seconds must be at least retry_base_seconds")
     timezone = general.get("timezone", "UTC").strip() or "UTC"
     try: ZoneInfo(timezone)
     except ZoneInfoNotFoundError: errors.append(f"[general] timezone is invalid: {timezone!r}")
     if errors: raise ValueError("configuration validation failed:\n" + "\n".join(f"- {e}" for e in errors))
-    return Settings(path, default_profile, database, spool, general.get("log_level", "INFO"), general.get("ffmpeg", "/usr/bin/ffmpeg"), general.get("mp3_bitrate", "64k"), timezone, ordering_delay_seconds, retry_max_attempts, retry_base_seconds, retry_max_seconds, methods, profiles, tuple(destinations))
+    return Settings(path, default_profile, database, spool, general.get("log_level", "INFO"), general.get("ffmpeg", "/usr/bin/ffmpeg"), general.get("mp3_bitrate", "64k"), timezone, ordering_delay_seconds, retry_max_attempts, retry_base_seconds, retry_max_seconds, discard_failed_calls, methods, profiles, tuple(destinations))

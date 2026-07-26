@@ -79,6 +79,7 @@ def migrate(legacy: dict[str, Any], legacy_path: Path, output_path: Path, upload
         "retry_max_attempts": "8",
         "retry_base_seconds": "30",
         "retry_max_seconds": "3600",
+        "discard_failed_calls": "no",
     }
     parser["method:rdio"] = {"enabled": "no"}
     parser["method:icad"] = {"enabled": "no"}

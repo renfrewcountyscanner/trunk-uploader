@@ -122,17 +122,28 @@ class Queue:
             converted = spool_dir / "converted.mp3"
             if converted.exists(): converted.unlink()
 
+    def _cleanup_spool(self, fingerprint: str, spool_dir: Path) -> None:
+        remaining = self.db.execute("SELECT 1 FROM destinations WHERE call_fingerprint=? AND status IN ('pending','retry','processing') LIMIT 1", (fingerprint,)).fetchone()
+        if remaining is None and spool_dir.is_dir():
+            shutil.rmtree(spool_dir, ignore_errors=True)
+
     def process(self, limit: int = 100) -> tuple[int, int]:
         success = failed = 0
         logger = setup(self.settings.log_level)
         for item in self._claim_pending(limit):
             destination = self._destination(item)
-            manifest = json.loads((item.spool_dir / "call.json").read_text(encoding="utf-8"))
-            audio = item.spool_dir / manifest["audio"]
-            metadata = item.spool_dir / manifest["metadata"]
-            m4a = item.spool_dir / manifest["m4a"] if manifest.get("m4a") else None
-            call = normalize(audio, metadata, m4a)
             try:
+                manifest = json.loads((item.spool_dir / "call.json").read_text(encoding="utf-8"))
+                audio = item.spool_dir / manifest["audio"]
+                metadata = item.spool_dir / manifest["metadata"]
+                m4a = item.spool_dir / manifest["m4a"] if manifest.get("m4a") else None
+                call = normalize(audio, metadata, m4a)
+                if not call.talkgroup_known:
+                    now = time.time()
+                    self.db.execute("UPDATE destinations SET status='skipped',attempt_count=?,last_attempt_time=?,next_retry_time=NULL,processing_time=NULL,error=?,completed_at=? WHERE id=?", (item.attempt_count, now, "talkgroup not in talkgroup file", now, item.id))
+                    logger.info("skipped: talkgroup not in talkgroup file", extra=extra(item.fingerprint, item.profile, item.destination_type, item.destination_name))
+                    self._cleanup_spool(item.fingerprint, item.spool_dir)
+                    continue
                 if destination.type == "rdio": result = RdioAdapter(self.settings.timezone).upload(call, destination, m4a if m4a and m4a.is_file() else audio)
                 elif destination.type == "icad": result = IcadAdapter().upload(call, destination, audio)
                 else:
@@ -148,14 +159,16 @@ class Queue:
             if result.success:
                 self.db.execute("UPDATE destinations SET status='success',attempt_count=?,last_attempt_time=?,next_retry_time=NULL,processing_time=NULL,http_status=?,error=?,completed_at=? WHERE id=?", (attempt, now, result.status, result.error, now, item.id)); success += 1
                 logger.info("success %s", result.error or "upload succeeded", extra=extra(item.fingerprint, item.profile, item.destination_type, item.destination_name))
-            elif result.retryable and attempt < self.settings.retry_max_attempts:
+            elif result.retryable and attempt < self.settings.retry_max_attempts and not self.settings.discard_failed_calls:
                 delay = min(self.settings.retry_max_seconds, self.settings.retry_base_seconds * (2 ** max(0, attempt - 1)))
                 self.db.execute("UPDATE destinations SET status='retry',attempt_count=?,last_attempt_time=?,next_retry_time=?,processing_time=NULL,http_status=?,error=? WHERE id=?", (attempt, now, now + delay, result.status, result.error[:500], item.id)); failed += 1
                 logger.warning("retry scheduled: %s", result.error, extra=extra(item.fingerprint, item.profile, item.destination_type, item.destination_name))
             else:
                 self.db.execute("UPDATE destinations SET status='failed',attempt_count=?,last_attempt_time=?,processing_time=NULL,http_status=?,error=?,completed_at=? WHERE id=?", (attempt, now, result.status, result.error[:500], now, item.id)); failed += 1
-                logger.error("permanent failure: %s", result.error, extra=extra(item.fingerprint, item.profile, item.destination_type, item.destination_name))
+                message = "discarded after failure" if self.settings.discard_failed_calls else "permanent failure"
+                logger.error("%s: %s", message, result.error, extra=extra(item.fingerprint, item.profile, item.destination_type, item.destination_name))
             self._cleanup_converted_audio(item.fingerprint, item.spool_dir)
+            if self.settings.discard_failed_calls: self._cleanup_spool(item.fingerprint, item.spool_dir)
         return success, failed
 
     def rows(self) -> list[sqlite3.Row]: return self.db.execute("SELECT * FROM destinations ORDER BY call_start_time, created_at, id").fetchall()

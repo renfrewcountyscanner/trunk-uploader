@@ -12,6 +12,8 @@ ordering_delay_seconds = 0
 retry_max_attempts = 8
 retry_base_seconds = 30
 retry_max_seconds = 3600
+# Delete failed call audio/metadata from the spool instead of retrying it.
+discard_failed_calls = no
 
 [method:rdio]
 enabled = no
