@@ -84,6 +84,8 @@ def test_retry_backoff_and_successful_destination_not_resent(tmp_path, monkeypat
 
 def test_discard_failed_call_removes_spool_without_retry(tmp_path, monkeypatch):
     settings, call = setup(tmp_path)
+    call.json_path.write_text(json.dumps({"talkgroup": 1, "short_name": "p", "start_time": 1, "talkgroup_tag": "Test", "talkgroup_description": "Test"}))
+    call = normalize(call.audio_path, call.json_path)
     settings.path.write_text(settings.path.read_text().replace("database = /tmp/trunk-uploader/uploader.sqlite3", f"database = {tmp_path}/db.sqlite3").replace("spool_dir = /tmp/trunk-uploader/spool", f"spool_dir = {tmp_path}/spool").replace("discard_failed_calls = no", "discard_failed_calls = yes"))
     settings = load_config(settings.path); queue = Queue(settings)
     destination = next(d for d in settings.destinations if d.type == "rdio")
