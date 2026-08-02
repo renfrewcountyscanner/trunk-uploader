@@ -127,9 +127,14 @@ class TrunkRecordingAdapter:
         start_time = datetime.fromtimestamp(call.start_time, timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
         original = call.original
         first_source = call.sources[0] if call.sources else {}
+        exact_name = destination.extra.get("receiver_name_exact", "").strip().lower() in {"yes", "true", "1", "on"}
+        receiver_name = destination.receiver_name if exact_name else (destination.receiver_name or "Trunk-Recorder " + destination.system_id)
         talkgroup_info = {
             "callTargets": [{"targetid": call.talkgroup, "targetlabel": call.talkgroup_description, "targettag": call.talkgroup_tag}],
-            "receiver": "" if destination.extra.get("receiver_name_exact", "").strip().lower() in {"yes", "true", "1", "on"} else (destination.receiver_name or destination.system_id),
+            # The logger derives receiver_id from this field. Exact receiver
+            # mode controls the legacy apiAuthID display behavior; it must not
+            # erase the receiver metadata sent to the destination.
+            "receiver": receiver_name,
             "receiverVCO": original.get("receiverVCO", original.get("receiver_vco", 0)),
             "frequency": call.frequency,
             "sourceid": first_source.get("src", first_source.get("source", original.get("sourceid", ""))),
@@ -145,10 +150,8 @@ class TrunkRecordingAdapter:
             "calltype": original.get("calltype", original.get("call_type", "1")),
         }
         # Trunk Recorder prepends apiAuthID to the displayed receiver name.
-        # Trunk Recorder prepends apiAuthID to the displayed receiver name.
-        # Exact mode puts the configured literal receiver name in apiAuthID
-        # and sends an empty suffix, preserving the API requirement for auth ID.
-        exact_name = destination.extra.get("receiver_name_exact", "").strip().lower() in {"yes", "true", "1", "on"}
+        # Exact mode keeps the configured literal receiver name as apiAuthID;
+        # receiver metadata is still sent explicitly above for the logger.
         auth_id = destination.receiver_name if exact_name else destination.auth_id
         metadata = {"apiAuthID": auth_id, "apiKey": destination.api_key, "callAudioFormat": "mp3", "recordedCall": {"talkGroupInfo": talkgroup_info, "startTime": start_time, "callDuration": call.duration, "startPositionSec": "00:00:00"}}
         headers = {"Authorization": f"Bearer {destination.api_key}", "X-API-Key": destination.api_key}

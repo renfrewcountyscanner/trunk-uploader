@@ -114,7 +114,7 @@ def test_trunk_recording_uses_configured_receiver_name(mock_post, tmp_path):
 
 
 @patch("trunk_uploader.adapters.requests.post")
-def test_trunk_recording_exact_receiver_name_omits_auth_prefix(mock_post, tmp_path):
+def test_trunk_recording_exact_receiver_name_preserves_receiver_metadata(mock_post, tmp_path):
     metadata = requests.Response(); metadata.status_code = 200; metadata._content = b'{"CallAudioID":"id"}'
     audio = requests.Response(); audio.status_code = 200
     mock_post.side_effect = [metadata, audio]
@@ -124,7 +124,7 @@ def test_trunk_recording_exact_receiver_name_omits_auth_prefix(mock_post, tmp_pa
     payload = mock_post.call_args_list[0].kwargs["json"]
     assert result.success
     assert payload["apiAuthID"] == "SEARS"
-    assert payload["recordedCall"]["talkGroupInfo"]["receiver"] == ""
+    assert payload["recordedCall"]["talkGroupInfo"]["receiver"] == "SEARS"
 
 
 @patch("trunk_uploader.adapters.requests.post")
