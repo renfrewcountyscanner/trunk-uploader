@@ -1,0 +1,998 @@
+{
+  "hosts": [
+    {
+      "apps": [
+        {
+          "config_file": "config/uploader.conf",
+          "container": "trunk-recorder",
+          "destinations": [
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "ems-paging-rdio",
+              "profile": "ems-paging",
+              "receiver_name": "",
+              "system_id": "1",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "renfrew-fire-rdio",
+              "profile": "renfrew-fire-paging",
+              "receiver_name": "",
+              "system_id": "2",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "ICAD_ICAD_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "renfrew-fire-icad",
+              "profile": "renfrew-fire-paging",
+              "receiver_name": "",
+              "system_id": "2",
+              "type": "icad",
+              "url": "https://icad.example.invalid/api/call-upload"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-kingston-system-100",
+              "profile": "fleetnet-kingston",
+              "receiver_name": "",
+              "system_id": "100",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-kingston-system-101",
+              "profile": "fleetnet-kingston",
+              "receiver_name": "",
+              "system_id": "101",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-kingston-system-102",
+              "profile": "fleetnet-kingston",
+              "receiver_name": "",
+              "system_id": "102",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-kingston-system-103",
+              "profile": "fleetnet-kingston",
+              "receiver_name": "",
+              "system_id": "103",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-kingston-system-104",
+              "profile": "fleetnet-kingston",
+              "receiver_name": "",
+              "system_id": "104",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-kingston-system-105",
+              "profile": "fleetnet-kingston",
+              "receiver_name": "",
+              "system_id": "105",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-multi-site-system-100",
+              "profile": "fleetnet-multi-site",
+              "receiver_name": "",
+              "system_id": "100",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-multi-site-system-101",
+              "profile": "fleetnet-multi-site",
+              "receiver_name": "",
+              "system_id": "101",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-multi-site-system-102",
+              "profile": "fleetnet-multi-site",
+              "receiver_name": "",
+              "system_id": "102",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-multi-site-system-103",
+              "profile": "fleetnet-multi-site",
+              "receiver_name": "",
+              "system_id": "103",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-multi-site-system-104",
+              "profile": "fleetnet-multi-site",
+              "receiver_name": "",
+              "system_id": "104",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "fleetnet-multi-site-system-105",
+              "profile": "fleetnet-multi-site",
+              "receiver_name": "",
+              "system_id": "105",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-pembroke-system-100",
+              "profile": "fleetnet-pembroke",
+              "receiver_name": "",
+              "system_id": "100",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-pembroke-system-101",
+              "profile": "fleetnet-pembroke",
+              "receiver_name": "",
+              "system_id": "101",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-pembroke-system-102",
+              "profile": "fleetnet-pembroke",
+              "receiver_name": "",
+              "system_id": "102",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-pembroke-system-103",
+              "profile": "fleetnet-pembroke",
+              "receiver_name": "",
+              "system_id": "103",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-pembroke-system-104",
+              "profile": "fleetnet-pembroke",
+              "receiver_name": "",
+              "system_id": "104",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-pembroke-system-105",
+              "profile": "fleetnet-pembroke",
+              "receiver_name": "",
+              "system_id": "105",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "kingston-area-paging-rdio",
+              "profile": "kingston-area-paging",
+              "receiver_name": "",
+              "system_id": "5",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "ICAD_ICAD_EXAMPLE_INVALID_2",
+              "auth_id": "",
+              "enabled": false,
+              "name": "frontenac-paging",
+              "profile": "kingston-area-paging",
+              "receiver_name": "",
+              "system_id": "10",
+              "type": "icad",
+              "url": "https://icad.example.invalid/tone_detect"
+            },
+            {
+              "api_key_ref": "ICAD_ICAD_EXAMPLE_INVALID_2",
+              "auth_id": "",
+              "enabled": false,
+              "name": "lanark-paging-tone-detect",
+              "profile": "kingston-area-paging",
+              "receiver_name": "",
+              "system_id": "18",
+              "type": "icad",
+              "url": "https://icad.example.invalid/tone_detect"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "ottawa-paging",
+              "profile": "ottawa-renfrew-lanark-paging",
+              "receiver_name": "",
+              "system_id": "2",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "RDIO_RADIO_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "lanark-paging",
+              "profile": "ottawa-renfrew-lanark-paging",
+              "receiver_name": "",
+              "system_id": "5",
+              "type": "rdio",
+              "url": "https://radio.example.invalid"
+            },
+            {
+              "api_key_ref": "LOGGER_KINGSTON",
+              "auth_id": "CHANGE_ME",
+              "enabled": false,
+              "name": "kingston-public",
+              "profile": "fleetnet-kingston",
+              "receiver_name": "",
+              "system_id": "KINGSTON",
+              "type": "trunk-recording",
+              "url": "https://record.example.invalid"
+            },
+            {
+              "api_key_ref": "LOGGER_KINGSTON",
+              "auth_id": "CHANGE_ME",
+              "enabled": false,
+              "name": "multi-public",
+              "profile": "fleetnet-multi-site",
+              "receiver_name": "",
+              "system_id": "FLEETNET",
+              "type": "trunk-recording",
+              "url": "https://record.example.invalid"
+            },
+            {
+              "api_key_ref": "LOGGER_PEMBROKE",
+              "auth_id": "FLEETNET",
+              "enabled": false,
+              "name": "public",
+              "profile": "fleetnet-pembroke",
+              "receiver_name": "FLEETNET-PEMBROKE",
+              "system_id": "PEMBROKE",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            },
+            {
+              "api_key_ref": "LOGGER_FLEETNET_PEMBROKE",
+              "auth_id": "fleetnet-pembroke",
+              "enabled": true,
+              "name": "logger",
+              "profile": "fleetnet-pembroke",
+              "receiver_name": "FLEETNET-PEMBROKE",
+              "system_id": "FLEETNET-PEMBROKE",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            },
+            {
+              "api_key_ref": "ICAD_ICAD_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "ottawa-renfrew-dispatch",
+              "profile": "ottawa-renfrew-lanark-paging",
+              "receiver_name": "",
+              "system_id": "2",
+              "type": "icad",
+              "url": "https://icad.example.invalid/api/call-upload"
+            },
+            {
+              "api_key_ref": "ICAD_ICAD_EXAMPLE_INVALID",
+              "auth_id": "",
+              "enabled": false,
+              "name": "lanark-dispatch",
+              "profile": "ottawa-renfrew-lanark-paging",
+              "receiver_name": "",
+              "system_id": "18",
+              "type": "icad",
+              "url": "https://icad.example.invalid/api/call-upload"
+            }
+          ],
+          "directory": "/app/fleetnet-pembroke",
+          "image": "robotastic/trunk-recorder:5.1.1",
+          "name": "fleetnet-pembroke",
+          "profiles": [
+            "ems-paging",
+            "renfrew-fire-paging",
+            "fleetnet-kingston",
+            "fleetnet-multi-site",
+            "fleetnet-pembroke",
+            "kingston-area-paging",
+            "ottawa-renfrew-lanark-paging"
+          ]
+        },
+        {
+          "config_file": "config/uploader.conf",
+          "container": "fire-paging",
+          "destinations": [
+            {
+              "api_key_ref": "ICAD_FIREPAGE",
+              "auth_id": "",
+              "enabled": true,
+              "name": "renfrewcounty-dispatch",
+              "profile": "renfrewfire",
+              "receiver_name": "",
+              "system_id": "2",
+              "type": "icad",
+              "url": "https://icad.firepage.ca/api/call-upload"
+            },
+            {
+              "api_key_ref": "RADIO_FIREPAGE",
+              "auth_id": "",
+              "enabled": true,
+              "name": "renfrewfire-rdio",
+              "profile": "renfrewfire",
+              "receiver_name": "",
+              "system_id": "2",
+              "type": "rdio",
+              "url": "https://radio.firepage.ca"
+            },
+            {
+              "api_key_ref": "LOGGER_RENFREW_FIRE",
+              "auth_id": "RENFREW",
+              "enabled": true,
+              "name": "fire-public",
+              "profile": "renfrewfire",
+              "receiver_name": "RENFREW-FIRE",
+              "system_id": "RENFREW-FIRE",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            }
+          ],
+          "directory": "/app/fire-paging/trunk-uploader",
+          "image": "9599ee26e4e8",
+          "name": "fire-paging",
+          "profiles": [
+            "renfrewfire"
+          ]
+        },
+        {
+          "config_file": "config/uploader.conf",
+          "container": "ems-paging",
+          "destinations": [
+            {
+              "api_key_ref": "RADIO_FIREPAGE",
+              "auth_id": "",
+              "enabled": true,
+              "name": "renfrew-ems-rdio",
+              "profile": "renfrew-ems",
+              "receiver_name": "",
+              "system_id": "1",
+              "type": "rdio",
+              "url": "https://radio.firepage.ca"
+            },
+            {
+              "api_key_ref": "ICAD_FIREPAGE_2",
+              "auth_id": "",
+              "enabled": true,
+              "name": "renfrew-ems-tone",
+              "profile": "renfrew-ems",
+              "receiver_name": "",
+              "system_id": "1",
+              "type": "icad",
+              "url": "https://icad.firepage.ca/api/call-upload"
+            },
+            {
+              "api_key_ref": "LOGGER_RENFREW_EMS",
+              "auth_id": "RENFREW",
+              "enabled": true,
+              "name": "renfrew-ems",
+              "profile": "renfrew-ems",
+              "receiver_name": "RENFREW-EMS",
+              "system_id": "RENFREW-EMS",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            }
+          ],
+          "directory": "/app/ems-paging/trunk-uploader",
+          "image": "9599ee26e4e8",
+          "name": "ems-paging",
+          "profiles": [
+            "renfrew-ems"
+          ]
+        },
+        {
+          "config_file": "config/uploader.conf",
+          "container": "sears",
+          "destinations": [
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "sears-rdio",
+              "profile": "sears",
+              "receiver_name": "",
+              "system_id": "600",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "LOGGER_SEARS",
+              "auth_id": "SEARS",
+              "enabled": true,
+              "name": "sears",
+              "profile": "sears",
+              "receiver_name": "SEARS",
+              "system_id": "SEARS",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            }
+          ],
+          "directory": "/app/sears/trunk-uploader",
+          "image": "robotastic/trunk-recorder:latest",
+          "name": "sears",
+          "profiles": [
+            "sears"
+          ]
+        },
+        {
+          "config_file": "config/uploader.conf",
+          "container": "",
+          "destinations": [
+            {
+              "api_key_ref": "LOGGER_LMRN",
+              "auth_id": "LMRN",
+              "enabled": true,
+              "name": "lmrn",
+              "profile": "lmrn",
+              "receiver_name": "LMRN",
+              "system_id": "LMRN",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            }
+          ],
+          "directory": "/app/lmrn/trunk-uploader",
+          "image": "",
+          "name": "lmrn",
+          "profiles": [
+            "lmrn"
+          ]
+        }
+      ],
+      "hostname": "local"
+    },
+    {
+      "apps": [
+        {
+          "config_file": "config/uploader.conf",
+          "container": "trunk-recorder",
+          "destinations": [
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-kinbrn-100",
+              "profile": "fleetnet-kinbrn",
+              "receiver_name": "",
+              "system_id": "100",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-kinbrn-101",
+              "profile": "fleetnet-kinbrn",
+              "receiver_name": "",
+              "system_id": "101",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-kinbrn-102",
+              "profile": "fleetnet-kinbrn",
+              "receiver_name": "",
+              "system_id": "102",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-kinbrn-103",
+              "profile": "fleetnet-kinbrn",
+              "receiver_name": "",
+              "system_id": "103",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-kinbrn-104",
+              "profile": "fleetnet-kinbrn",
+              "receiver_name": "",
+              "system_id": "104",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-kinbrn-105",
+              "profile": "fleetnet-kinbrn",
+              "receiver_name": "",
+              "system_id": "105",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-winchs-100",
+              "profile": "fleetnet-winchs",
+              "receiver_name": "",
+              "system_id": "100",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-winchs-101",
+              "profile": "fleetnet-winchs",
+              "receiver_name": "",
+              "system_id": "101",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-winchs-102",
+              "profile": "fleetnet-winchs",
+              "receiver_name": "",
+              "system_id": "102",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-winchs-103",
+              "profile": "fleetnet-winchs",
+              "receiver_name": "",
+              "system_id": "103",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-winchs-104",
+              "profile": "fleetnet-winchs",
+              "receiver_name": "",
+              "system_id": "104",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-winchs-105",
+              "profile": "fleetnet-winchs",
+              "receiver_name": "",
+              "system_id": "105",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-mtspat-100",
+              "profile": "fleetnet-mtspat",
+              "receiver_name": "",
+              "system_id": "100",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-mtspat-101",
+              "profile": "fleetnet-mtspat",
+              "receiver_name": "",
+              "system_id": "101",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-mtspat-102",
+              "profile": "fleetnet-mtspat",
+              "receiver_name": "",
+              "system_id": "102",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-mtspat-103",
+              "profile": "fleetnet-mtspat",
+              "receiver_name": "",
+              "system_id": "103",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-mtspat-104",
+              "profile": "fleetnet-mtspat",
+              "receiver_name": "",
+              "system_id": "104",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "fleetnet-mtspat-105",
+              "profile": "fleetnet-mtspat",
+              "receiver_name": "",
+              "system_id": "105",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "LOGGER_FLEETNET_OTTAWA",
+              "auth_id": "fleetnet-ottawa",
+              "enabled": true,
+              "name": "fleetnet-kinbrn",
+              "profile": "fleetnet-kinbrn",
+              "receiver_name": "FLEETNET-OTTAWA",
+              "system_id": "FLEETNET-OTTAWA",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            },
+            {
+              "api_key_ref": "LOGGER_FLEETNET_OTTAWA",
+              "auth_id": "fleetnet-ottawa",
+              "enabled": true,
+              "name": "fleetnet-winchs",
+              "profile": "fleetnet-winchs",
+              "receiver_name": "FLEETNET-OTTAWA",
+              "system_id": "FLEETNET-OTTAWA",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            },
+            {
+              "api_key_ref": "LOGGER_FLEETNET_OTTAWA",
+              "auth_id": "fleetnet-ottawa",
+              "enabled": true,
+              "name": "fleetnet-mtspat",
+              "profile": "fleetnet-mtspat",
+              "receiver_name": "FLEETNET-OTTAWA",
+              "system_id": "FLEETNET-OTTAWA",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            }
+          ],
+          "directory": "/app/fleetnet-multi/trunk-uploader",
+          "image": "robotastic/trunk-recorder:5.1.1",
+          "name": "fleetnet-multi",
+          "profiles": [
+            "fleetnet-kinbrn",
+            "fleetnet-winchs",
+            "fleetnet-mtspat"
+          ]
+        },
+        {
+          "config_file": "config/uploader.conf",
+          "container": "fire-paging",
+          "destinations": [
+            {
+              "api_key_ref": "RADIO_FIREPAGE",
+              "auth_id": "",
+              "enabled": true,
+              "name": "eastrenfrew",
+              "profile": "eastrenfrew",
+              "receiver_name": "",
+              "system_id": "2",
+              "type": "rdio",
+              "url": "https://radio.firepage.ca"
+            },
+            {
+              "api_key_ref": "RADIO_FIREPAGE_2",
+              "auth_id": "",
+              "enabled": true,
+              "name": "lanark",
+              "profile": "lanark",
+              "receiver_name": "",
+              "system_id": "5",
+              "type": "rdio",
+              "url": "https://radio.firepage.ca"
+            },
+            {
+              "api_key_ref": "ICAD_FIREPAGE",
+              "auth_id": "",
+              "enabled": true,
+              "name": "icad-eastrenfrew",
+              "profile": "eastrenfrew",
+              "receiver_name": "",
+              "system_id": "2",
+              "type": "icad",
+              "url": "https://icad.firepage.ca/api/call-upload"
+            },
+            {
+              "api_key_ref": "ICAD_FIREPAGE_3",
+              "auth_id": "",
+              "enabled": true,
+              "name": "icad-lanark",
+              "profile": "lanark",
+              "receiver_name": "",
+              "system_id": "18",
+              "type": "icad",
+              "url": "https://icad.firepage.ca/api/call-upload"
+            },
+            {
+              "api_key_ref": "LOGGER_RENFREW_FIRE",
+              "auth_id": "FLEETNET",
+              "enabled": true,
+              "name": "tr-fire-eastrenfrew",
+              "profile": "eastrenfrew",
+              "receiver_name": "RENFREW-FIRE",
+              "system_id": "EASTRENFREW",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            },
+            {
+              "api_key_ref": "LOGGER_LANARK",
+              "auth_id": "FLEETNET",
+              "enabled": true,
+              "name": "tr-fire-lanark",
+              "profile": "lanark",
+              "receiver_name": "LANARK-FIRE",
+              "system_id": "LANARK",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            }
+          ],
+          "directory": "/app/trunk-paging/trunk-uploader",
+          "image": "robotastic/trunk-recorder:latest",
+          "name": "trunk-paging",
+          "profiles": [
+            "eastrenfrew",
+            "lanark"
+          ]
+        }
+      ],
+      "hostname": "firepage-ottawa.tail564fa.ts.net",
+      "username": "root"
+    },
+    {
+      "apps": [
+        {
+          "config_file": "config/uploader.conf",
+          "container": "trunk-recorder",
+          "destinations": [
+            {
+              "api_key_ref": "LOGGER_FLEETNET_KINGSTON",
+              "auth_id": "FLEETNET",
+              "enabled": true,
+              "name": "fire-public",
+              "profile": "kingston",
+              "receiver_name": "FLEETNET-KINGSTON",
+              "system_id": "FLEETNET-KINGSTON",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "kingston-system-100",
+              "profile": "kingston",
+              "receiver_name": "",
+              "system_id": "100",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "kingston-system-101",
+              "profile": "kingston",
+              "receiver_name": "",
+              "system_id": "101",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "kingston-system-102",
+              "profile": "kingston",
+              "receiver_name": "",
+              "system_id": "102",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "kingston-system-103",
+              "profile": "kingston",
+              "receiver_name": "",
+              "system_id": "103",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "kingston-system-104",
+              "profile": "kingston",
+              "receiver_name": "",
+              "system_id": "104",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            },
+            {
+              "api_key_ref": "RDIO_DYNDNS",
+              "auth_id": "",
+              "enabled": true,
+              "name": "kingston-system-105",
+              "profile": "kingston",
+              "receiver_name": "",
+              "system_id": "105",
+              "type": "rdio",
+              "url": "https://rdio.dyndns.org"
+            }
+          ],
+          "directory": "/app/fleetnet-kingston/trunk-uploader",
+          "image": "robotastic/trunk-recorder:5.1.1",
+          "name": "fleetnet-kingston",
+          "profiles": [
+            "kingston"
+          ]
+        },
+        {
+          "config_file": "config/uploader.conf",
+          "container": "fire-paging",
+          "destinations": [
+            {
+              "api_key_ref": "RADIO_FIREPAGE_2",
+              "auth_id": "",
+              "enabled": true,
+              "name": "frontenac",
+              "profile": "frontenac-paging",
+              "receiver_name": "",
+              "system_id": "5",
+              "type": "rdio",
+              "url": "https://radio.firepage.ca"
+            },
+            {
+              "api_key_ref": "ICAD_FIREPAGE_4",
+              "auth_id": "",
+              "enabled": true,
+              "name": "frontenac-icad",
+              "profile": "frontenac-paging",
+              "receiver_name": "",
+              "system_id": "5",
+              "type": "icad",
+              "url": "https://icad.firepage.ca/api/call-upload"
+            },
+            {
+              "api_key_ref": "LOGGER_FRONTENAC",
+              "auth_id": "FLEETNET",
+              "enabled": true,
+              "name": "frontenac-trunk",
+              "profile": "frontenac-paging",
+              "receiver_name": "FIRE-FRONTENAC",
+              "system_id": "FRONTENAC",
+              "type": "trunk-recording",
+              "url": "https://logger-api.renfrewcountyscanner.com"
+            }
+          ],
+          "directory": "/app/trunk-paging/trunk-uploader",
+          "image": "robotastic/trunk-recorder:latest",
+          "name": "trunk-paging",
+          "profiles": [
+            "frontenac-paging"
+          ]
+        }
+      ],
+      "hostname": "rcs-kingston.tail564fa.ts.net",
+      "username": "root"
+    }
+  ],
+  "last_scan": "2026-08-07T16:26:40.434499Z",
+  "ssh_password_ref": "SSH_PASSWORD"
+}
