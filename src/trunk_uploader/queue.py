@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 import sqlite3
+import subprocess
 import threading
 import time
 from dataclasses import dataclass
@@ -10,6 +11,7 @@ from pathlib import Path
 
 from .adapters import RdioAdapter, IcadAdapter, TrunkRecordingAdapter
 from .config import Destination, Settings
+from .http import ResponseResult, classify
 from .model import Call, normalize
 from .logging import setup, extra
 
@@ -149,10 +151,19 @@ class Queue:
                 else:
                     mp3 = item.spool_dir / "converted.mp3"
                     adapter = TrunkRecordingAdapter(self.settings)
-                    if not mp3.is_file(): adapter.converter(call, mp3)
-                    result = adapter.upload(call, destination, mp3)
+                    if not mp3.is_file():
+                        try:
+                            adapter.converter(call, mp3)
+                        except subprocess.CalledProcessError as exc:
+                            stderr = exc.stderr.decode(errors="replace").strip()[:500] if exc.stderr else ""
+                            result = ResponseResult(False, True, None, f"ffmpeg failed (exit {exc.returncode}): {stderr}")
+                        except FileNotFoundError as exc:
+                            result = ResponseResult(False, True, None, f"ffmpeg not found: {exc}")
+                        else:
+                            result = adapter.upload(call, destination, mp3)
+                    else:
+                        result = adapter.upload(call, destination, mp3)
             except Exception as exc:
-                from .http import classify
                 result = classify(error=exc)
             now = time.time()
             attempt = item.attempt_count + 1

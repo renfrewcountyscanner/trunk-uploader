@@ -164,4 +164,7 @@ class TrunkRecordingAdapter:
             with audio.open("rb") as fh:
                 second = requests.post(url_join(destination.url, f"/api/callaudioupload/{call_id}"), data=fh, headers={**headers, "Content-Type": "audio/mpeg", "Content-Length": str(audio.stat().st_size)}, timeout=(15, 120))
             return classify(second)
-        except (OSError, requests.RequestException, subprocess.SubprocessError) as exc: return classify(error=exc)
+        except subprocess.CalledProcessError as exc:
+            stderr = exc.stderr.decode(errors="replace").strip()[:500] if exc.stderr else ""
+            return ResponseResult(False, True, None, f"ffmpeg failed (exit {exc.returncode}): {stderr}")
+        except (OSError, requests.RequestException) as exc: return classify(error=exc)
